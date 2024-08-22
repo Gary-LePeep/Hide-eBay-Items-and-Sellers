@@ -1,0 +1,86 @@
+{
+  "manifest_version": 2,
+  "name": "Hide eBay Items and Sellers",
+  "version": "1.0.0",
+  "description": "Hide items and sellers you don't like from appearing in eBay search and category results.",
+  "icons": {
+    "128": "icon128.png",
+    "48": "icon48.png",
+    "16": "icon16.png"
+  },
+  "page_action": {
+    "default_icon": "icon16.png",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "jquery-3.4.1.min.js",
+        "content.js"
+      ],
+      "css": [
+        "css/content.css"
+      ],
+      "matches": [
+        "https://*.ebay.com/*",
+        "https://*.ebay.com.au/*",
+        "https://*.ebay.at/*",
+        "https://*.ebay.be/*",
+        "https://*.ebay.ca/*",
+        "https://*.ebay.fr/*",
+        "https://*.ebay.de/*",
+        "https://*.ebay.com.hk/*",
+        "https://*.ebay.ie/*",
+        "https://*.ebay.it/*",
+        "https://*.ebay.com.my/*",
+        "https://*.ebay.nl/*",
+        "https://*.ebay.ph/*",
+        "https://*.ebay.pl/*",
+        "https://*.ebay.com.sg/*",
+        "https://*.ebay.es/*",
+        "https://*.ebay.ch/*",
+        "https://*.ebay.co.uk/*"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": true
+  },
+  "web_accessible_resources": [
+    "icon48.png"
+  ],
+  "permissions": [
+    "storage",
+    "unlimitedStorage",
+    "tabs",
+    "webRequest",
+    "webRequestBlocking",
+    "https://*.ebay.com/*",
+    "https://*.ebay.com.au/*",
+    "https://*.ebay.at/*",
+    "https://*.ebay.be/*",
+    "https://*.ebay.ca/*",
+    "https://*.ebay.fr/*",
+    "https://*.ebay.de/*",
+    "https://*.ebay.com.hk/*",
+    "https://*.ebay.ie/*",
+    "https://*.ebay.it/*",
+    "https://*.ebay.com.my/*",
+    "https://*.ebay.nl/*",
+    "https://*.ebay.ph/*",
+    "https://*.ebay.pl/*",
+    "https://*.ebay.com.sg/*",
+    "https://*.ebay.es/*",
+    "https://*.ebay.ch/*",
+    "https://*.ebay.co.uk/*"
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{78328bdc-5edb-480c-8ea8-0160a565c371}"
+    }
+  }
+}

@@ -1,0 +1,54 @@
+
+.s-item .s-item__wrapper {
+    position: relative;
+}
+
+.si-cnt .bdg-90 {
+    position: relative;
+    overflow: visible;
+}
+
+.item-cta-wrapper .seller-details {
+    position: relative;
+}
+
+
+.hide-item-button {
+    box-sizing: inherit;
+    position: absolute;
+    right: 40px;
+    bottom: 0;
+}
+
+.sresult .hide-item-button {
+    bottom: 10px;
+}
+
+.b-list__items_nofooter .hide-item-button {
+    bottom: 6px;
+}
+
+.hide-seller-button {
+    box-sizing: inherit;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.hide-seller-profile-button {
+    display: inline-block;
+    margin-left: 20px;
+    margin-bottom: 5px;
+}
+
+.eh-not-hidden {
+    filter: sepia(100%) opacity(40%);
+}
+
+.eh-not-hidden:active {
+    filter: none;
+}
+
+.eh-is-hidden:active {
+    filter: sepia(100%) opacity(70%);
+}

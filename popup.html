@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Ebay Seller Hide</title>
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <nav>
+        <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+            <a class="nav-item nav-link active" id="nav-sellers-tab" data-toggle="tab" href="#nav-sellers" role="tab" aria-controls="nav-home" aria-selected="true">Sellers</a>
+            <a class="nav-item nav-link" id="nav-items-tab" data-toggle="tab" href="#nav-items" role="tab" aria-controls="nav-profile" aria-selected="false">Items</a>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="nav-sellers" role="tabpanel" aria-labelledby="nav-sellers-tab">
+                <div class="container">
+                    <!-- <h3>Hidden Sellers</h3> -->
+                    <ul class="list-group list-group-flush seller-list-group">
+                        <li class="list-group-item align-items-center default-list-item">No Sellers Hidden...</li>
+                    </ul>
+                    <br>
+                    <p>All items from sellers in this list will not appear when searching eBay.</p>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control userid-input" placeholder="Seller's user ID" aria-label="Seller's user ID" aria-describedby="basic-addon2">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-danger hide-button" type="button">
+                                <span>Hide Seller</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="invalid-feedback">Please provide a valid eBay seller user ID.</div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="nav-items" role="tabpanel" aria-labelledby="nav-items-tab">
+                <div class="container">
+                    <!-- <h3>Hidden Items</h3> -->
+                    <ul class="list-group list-group-flush item-list-group">
+                        <li class="list-group-item align-items-center default-list-item">No Items Hidden...</li>
+                    </ul>
+                    <br>
+                    <p>Items in this list will not appear when searching eBay.</p>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control item-number-input" placeholder="Item number" aria-label="eBay item number" aria-describedby="basic-addon2">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-danger hide-button" type="button">
+                                <span>Hide Item</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="invalid-feedback">Please provide a valid eBay item number.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="jquery-3.4.1.min.js"></script>
+    <script src="bootstrap.min.js"></script>
+    <script src="popup.js"></script>
+</body>
+
+</html>

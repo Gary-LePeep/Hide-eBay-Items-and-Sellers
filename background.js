@@ -10,35 +10,34 @@ let list = {
  * Updates URL parameters by reading the list of hidden sellers
  * and adding them to the URL as excluded sellers.
  * 
- * 
- * @param {string} u The URL to be updated.
+ * @param {string} url The URL to be updated.
  * @returns {string} The updated URL.
  */
-function updateParameters(u) {
-    let url = new URL(u);
-    url.searchParams.delete('_sasl');
+function updateParameters(url) {
+    const urlObj = new URL(url);
+    const searchParams = urlObj.searchParams;
+    searchParams.delete('_sasl');
 
-    // _sasl is the url parameter for excluded sellers on ebay.
-    // _saslop=2 is the url parameter for setting _sasl to exclude sellers.
-    // LH_SpecificSeller=1 is the url parameter for getting specific sellers from URL rather than from saved sellers list or the like.
-    let sellers_string = list.sellers.toString();
-    if (sellers_string === '') {
-        url.searchParams.delete('LH_SpecificSeller');
-        url.searchParams.delete('_saslop');
+    const sellersString = list.sellers.toString();
+    if (sellersString === '') {
+        searchParams.delete('LH_SpecificSeller');
+        searchParams.delete('_saslop');
     } else {
-        let parameters = ['LH_SpecificSeller', '_saslop'];
-        let values = [1, 2];
-        parameters.forEach(function(p, i) {
-            if (url.searchParams.has(p)) {
-                url.searchParams.set(p, values[i]);
+        const parameters = ['LH_SpecificSeller', '_saslop'];
+        const values = [1, 2];
+
+        parameters.forEach((parameter, i) => {
+            if (searchParams.has(parameter)) {
+                searchParams.set(parameter, values[i]);
             } else {
-                url.searchParams.append(p, values[i]);
+                searchParams.append(parameter, values[i]);
             }
         });
-        url.searchParams.append('_sasl', list.sellers.toString());
+        searchParams.append('_sasl', sellersString);
     }
-    return url.toString();
+    return urlObj.toString();
 }
+
 
 /**
  * Update Page Action Visibility

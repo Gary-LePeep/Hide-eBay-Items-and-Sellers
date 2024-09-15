@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "name": "Hide eBay Items and Sellers",
+  "name": "Hide eBay Items and Sellers Dev",
   "version": "1.0.0",
   "description": "Hide items and sellers you don't like from appearing in eBay search and category results.",
   "icons": {

@@ -1,7 +1,7 @@
 let list = {
     sellers: [],
     items: [],
-    ebayURL: ''
+    websiteURL: ''
 };
 
 function updateParameters(u) {
@@ -30,9 +30,9 @@ function updateParameters(u) {
 function updateVisibility(url, tabId) {
     if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..*/.test(url)) {
         chrome.pageAction.show(tabId, function() {
-            if (list.ebayURL === '') {
-                let ebayURL = new URL(url.toString()).origin;
-                list.ebayURL = ebayURL;
+            if (list.websiteURL === '') {
+                let websiteURL = new URL(url.toString()).origin;
+                list.websiteURL = websiteURL;
                 updateStorageList();
             }
         });
@@ -62,7 +62,7 @@ function updateStorageList() {
         list: list
     }, function() {
         console.log('background.js updated list:');
-        console.log('ebayURL: ' + list.ebayURL);
+        console.log('websiteURL: ' + list.websiteURL);
     });
 }
 

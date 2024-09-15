@@ -3,7 +3,7 @@ $(function() {
     let list = {
         sellers: [],
         items: [],
-        ebayURL: ''
+        websiteURL: ''
     };
 
     chrome.storage.local.get({
@@ -33,7 +33,7 @@ $(function() {
             console.log('popup.js updated list:');
             console.log('sellers: ' + list.sellers);
             console.log('items: ' + list.items);
-            console.log('ebayURL: ' + list.ebayURL);
+            console.log('websiteURL: ' + list.websiteURL);
         });
     }
 
@@ -131,7 +131,7 @@ $(function() {
     });
 
     function addListItem(selector, value) {
-        let href = (list.ebayURL === '') ? 'https://ebay.com' : list.ebayURL;
+        let href = (list.websiteURL === '') ? 'https://ebay.com' : list.websiteURL;
         if ($(selector).hasClass('seller-list-group')) {
             href += '/usr/' + value;
         } else  {

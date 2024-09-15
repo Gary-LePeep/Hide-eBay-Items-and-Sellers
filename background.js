@@ -43,22 +43,21 @@ function updateParameters(url) {
  * This function is called when the user navigates to a new page.
  * If the page is an ebay page, it shows the page action.
  * If the page is not an ebay page, it hides the page action.
- * @param {string} url The URL of the new page.
+ * @param {string} newUrl The URL of the new page.
  * @param {int} tabId The id of the tab that was updated.
  */
-function updateVisibility(url, tabId) {
-    if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..*/.test(url)) {
-        chrome.pageAction.show(tabId, function () {
-            if (list.websiteURL === '') {
-                let websiteURL = new URL(url.toString()).origin;
-                list.websiteURL = websiteURL;
-                updateStorageList();
-            }
-        });
-    } else {
-        chrome.pageAction.hide(tabId);
+function updatePageActionVisibility(newUrl, tabId) {
+    const isEbayPage = /^https:\/\/(www|.+?|www\..+?)\.ebay\..*/.test(newUrl);
+    const action = isEbayPage ? 'show' : 'hide';
+
+    chrome.pageAction[action](tabId);
+
+    if (isEbayPage && list.websiteURL === '') {
+        list.websiteURL = new URL(newUrl).origin;
+        updateStorageList();
     }
 }
+
 
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     updateVisibility(tab.url, tabId);

@@ -4,11 +4,24 @@ let list = {
     websiteURL: ''
 };
 
+/**
+ * Update URL Parameters
+ * 
+ * Updates URL parameters by reading the list of hidden sellers
+ * and adding them to the URL as excluded sellers.
+ * 
+ * 
+ * @param {string} u The URL to be updated.
+ * @returns {string} The updated URL.
+ */
 function updateParameters(u) {
     let url = new URL(u);
-    let sellers_string = list.sellers.toString();
-    //console.log('sellers_string: ' + sellers_string);
     url.searchParams.delete('_sasl');
+
+    // _sasl is the url parameter for excluded sellers on ebay.
+    // _saslop=2 is the url parameter for setting _sasl to exclude sellers.
+    // LH_SpecificSeller=1 is the url parameter for getting specific sellers from URL rather than from saved sellers list or the like.
+    let sellers_string = list.sellers.toString();
     if (sellers_string === '') {
         url.searchParams.delete('LH_SpecificSeller');
         url.searchParams.delete('_saslop');
@@ -27,6 +40,15 @@ function updateParameters(u) {
     return url.toString();
 }
 
+/**
+ * Update Page Action Visibility
+ * 
+ * This function is called when the user navigates to a new page.
+ * If the page is an ebay page, it shows the page action.
+ * If the page is not an ebay page, it hides the page action.
+ * @param {string} url The URL of the new page.
+ * @param {int} tabId The id of the tab that was updated.
+ */
 function updateVisibility(url, tabId) {
     if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..*/.test(url)) {
         chrome.pageAction.show(tabId, function() {
@@ -57,6 +79,9 @@ chrome.storage.local.get({
     list = data.list;
 });
 
+/**
+ * Saves the current list of hidden sellers and items to local storage.
+ */
 function updateStorageList() {
     chrome.storage.local.set({
         list: list

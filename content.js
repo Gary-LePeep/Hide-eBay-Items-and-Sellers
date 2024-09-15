@@ -20,18 +20,14 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
 });
 
 /**
- * Get Item Number
+ * Extracts the 12-digit item number from a URL.
  * 
- * @param {String} href The string in the url bar.
- * @returns The 12 digit item number for the item in the href.
+ * @param {string} url The URL of the item.
+ * @returns {string} The 12-digit item number or an empty string if not found.
  */
-function getItemNumber(href) {
-    let matchedArr = href.match(/^.+?itm\/(\d{12}).+$/) || href.match(/^.+?iid=(\d{12}).*$/) || [''];
-    if (matchedArr.length > 1 && matchedArr[1].length === 12 && /^\d+$/.test(matchedArr[1])) {
-        return matchedArr[1];
-    }  else {
-        return '';
-    }
+function getItemNumber(url) {
+    const itemNumberMatch = url.match(/itm\/(\d{12})/) || url.match(/iid=(\d{12})/);
+    return itemNumberMatch && itemNumberMatch[1].length === 12 ? itemNumberMatch[1] : '';
 }
 
 /**
@@ -45,9 +41,9 @@ function getItemNumber(href) {
 function processSearchPage() {
     // Get the list of search results from the page elements
     let ulLists = ['ul.srp-results', 'ul#ListViewInner', 'ul.b-list__items_nofooter'];
-    var currentList = null;
+    let currentList = null;
     let divSelecter = null;
-    for (var item in ulLists) {
+    for (let item in ulLists) {
         if (ulLists.hasOwnProperty(item)) {
             if ($(ulLists[item]).length) {
                 currentList = $(ulLists[item]);
@@ -109,7 +105,7 @@ function processItemPage() {
     sellerInfoDivs[0].appendChild(userIdHideButtonDiv)
     userIdHideButtonDiv.style = `position: relative; left: 25px; top: -2px`
 
-    let classList = 'hide-seller-button ' + list.sellers.includes(sellerUserID) ? 'eh-is-hidden' : 'eh-not-hidden';
+    let classList = `hide-seller-button ${list.sellers.includes(sellerUserID) ? 'eh-is-hidden' : 'eh-not-hidden'}`;
     insertButton(22, 'Hide seller\'s items from search results.', classList, userIdHideButtonDiv);
     $(userIdHideButtonDiv).on('click', '.hide-seller-button', function() {
         $(this).toggleClass('eh-is-hidden eh-not-hidden');

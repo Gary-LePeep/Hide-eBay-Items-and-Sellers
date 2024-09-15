@@ -14,27 +14,25 @@ let list = {
  * @returns {string} The updated URL.
  */
 function updateParameters(url) {
+    // _sasl is the url parameter for excluded sellers on ebay.
+    // _saslop=2 is the url parameter for setting _sasl to exclude sellers.
+    // LH_SpecificSeller=1 is the url parameter for getting specific sellers from URL rather than from saved sellers list or the like.
+    const parameters = {
+        'LH_SpecificSeller': 1,
+        '_saslop': 2,
+        '_sasl': list.sellers.toString()
+    };
+
     const urlObj = new URL(url);
     const searchParams = urlObj.searchParams;
-    searchParams.delete('_sasl');
 
-    const sellersString = list.sellers.toString();
-    if (sellersString === '') {
-        searchParams.delete('LH_SpecificSeller');
-        searchParams.delete('_saslop');
-    } else {
-        const parameters = ['LH_SpecificSeller', '_saslop'];
-        const values = [1, 2];
-
-        parameters.forEach((parameter, i) => {
-            if (searchParams.has(parameter)) {
-                searchParams.set(parameter, values[i]);
-            } else {
-                searchParams.append(parameter, values[i]);
-            }
-        });
-        searchParams.append('_sasl', sellersString);
+    for (const key in parameters) {
+        if (searchParams.has(key)) {
+            searchParams.delete(key);
+        }
+        searchParams.append(key, parameters[key]);
     }
+
     return urlObj.toString();
 }
 
@@ -50,7 +48,7 @@ function updateParameters(url) {
  */
 function updateVisibility(url, tabId) {
     if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..*/.test(url)) {
-        chrome.pageAction.show(tabId, function() {
+        chrome.pageAction.show(tabId, function () {
             if (list.websiteURL === '') {
                 let websiteURL = new URL(url.toString()).origin;
                 list.websiteURL = websiteURL;
@@ -62,19 +60,19 @@ function updateVisibility(url, tabId) {
     }
 }
 
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     updateVisibility(tab.url, tabId);
 });
 
-chrome.tabs.onActivated.addListener(function(activeInfo) {
-    chrome.tabs.get(activeInfo.tabId, function(tab) {
+chrome.tabs.onActivated.addListener(function (activeInfo) {
+    chrome.tabs.get(activeInfo.tabId, function (tab) {
         updateVisibility(tab.url, tab.id);
     });
 });
 
 chrome.storage.local.get({
     list: list
-}, function(data) {
+}, function (data) {
     list = data.list;
 });
 
@@ -84,13 +82,13 @@ chrome.storage.local.get({
 function updateStorageList() {
     chrome.storage.local.set({
         list: list
-    }, function() {
+    }, function () {
         console.log('background.js updated list:');
         console.log('websiteURL: ' + list.websiteURL);
     });
 }
 
-chrome.storage.onChanged.addListener(function(changes, namespace) {
+chrome.storage.onChanged.addListener(function (changes, namespace) {
     for (var key in changes) {
         if (key === 'list') {
             list = changes[key].newValue;
@@ -98,17 +96,14 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
     }
 });
 
-chrome.webRequest.onBeforeRequest.addListener(function(details) {
+chrome.webRequest.onBeforeRequest.addListener(function (details) {
     if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..+?\/(sch|b)\/.+/.test(details.url)) {
-        //if (list.sellers.length) {
-            let url = updateParameters(details.url);
-            if (details.url !== url) {
-                console.log('updating url...');
-                return {
-                    redirectUrl: url
-                };
-            }
-        //}
+        let url = updateParameters(details.url);
+        if (details.url !== url) {
+            return {
+                redirectUrl: url
+            };
+        }
     }
 }, {
     urls: ["https://*.ebay.com/*",

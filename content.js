@@ -6,12 +6,12 @@ let list = {
 
 chrome.storage.local.get({
     list: list
-}, function(data) {
+}, function (data) {
     list = data.list;
     processWebpage();
 });
 
-chrome.storage.onChanged.addListener(function(changes, namespace) {
+chrome.storage.onChanged.addListener(function (changes, namespace) {
     for (var key in changes) {
         if (key === 'list') {
             list = changes[key].newValue;
@@ -63,14 +63,14 @@ function processSearchPage() {
 
     // Hide any items that have already been previously hidden.
     if (divSelecter === 'li.sresult') {
-        $('li.sresult', currentList).each(function() {
+        $('li.sresult', currentList).each(function () {
             let itemNumber = $(this).attr('listingid');
             if (itemNumber !== '' && list.items.includes(itemNumber)) {
                 $(this).closest('li').remove();
             }
         });
     } else {
-        $('li .s-item__info .s-item__link', currentList).each(function() {
+        $('li .s-item__info .s-item__link', currentList).each(function () {
             let itemNumber = getItemNumber($(this).attr('href'));
             if (itemNumber !== '' && list.items.includes(itemNumber)) {
                 $(this).closest('li').remove();
@@ -107,7 +107,7 @@ function processItemPage() {
 
     let classList = `hide-seller-button ${list.sellers.includes(sellerUserID) ? 'eh-is-hidden' : 'eh-not-hidden'}`;
     insertButton(22, 'Hide seller\'s items from search results.', classList, userIdHideButtonDiv);
-    $(userIdHideButtonDiv).on('click', '.hide-seller-button', function() {
+    $(userIdHideButtonDiv).on('click', '.hide-seller-button', function () {
         $(this).toggleClass('eh-is-hidden eh-not-hidden');
         updateSellerHiddenStatus(sellerUserID);
     });
@@ -136,7 +136,7 @@ function processUserPage() {
 
     let classList = `hide-seller-button ${list.sellers.includes(sellerUserID) ? 'eh-is-hidden' : 'eh-not-hidden'}`;
     insertButton(30, 'Hide seller\'s items from search results.', classList, userIdHideButtonDiv);
-    $(userIdHideButtonDiv).on('click', '.hide-seller-button', function() {
+    $(userIdHideButtonDiv).on('click', '.hide-seller-button', function () {
         $(this).toggleClass('eh-is-hidden eh-not-hidden');
         updateSellerHiddenStatus(sellerUserID);
     });
@@ -205,7 +205,7 @@ function updateSellerHiddenStatus(sellerUserID) {
     console.log('updating seller status');
     console.log(sellerUserID);
     if (list.sellers.includes(sellerUserID)) {
-        list.sellers = $.grep(list.sellers, function(value) {
+        list.sellers = $.grep(list.sellers, function (value) {
             return value != sellerUserID;
         });
     } else {
@@ -240,7 +240,7 @@ function insertButton(size, title, classList, contSelecter) {
 function updateStorageList() {
     chrome.storage.local.set({
         list: list
-    }, function() {
+    }, function () {
         console.log('content.js updated list.');
     });
 }

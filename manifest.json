@@ -1,5 +1,5 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Hide eBay Items and Sellers Dev",
   "version": "1.0.0",
   "description": "Hide items and sellers you don't like from appearing in eBay search and category results.",
@@ -51,14 +51,23 @@
     "persistent": true
   },
   "web_accessible_resources": [
-    "icon48.png"
+    {
+      "resources": [
+        "icon48.png"
+      ],
+      "matches": [
+        "*://*/*"
+      ]
+    }
   ],
   "permissions": [
     "storage",
     "unlimitedStorage",
     "tabs",
     "webRequest",
-    "webRequestBlocking",
+    "webRequestBlocking"
+  ],
+  "host_permissions": [
     "https://*.ebay.com/*",
     "https://*.ebay.com.au/*",
     "https://*.ebay.at/*",

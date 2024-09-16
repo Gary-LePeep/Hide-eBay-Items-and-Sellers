@@ -147,8 +147,8 @@ function processUserPage() {
  * 
  * This function checks the url for one of the following subdirectories:
  * Ebay:
- *   `sch` or `b`: This is a search page.
- *   `itm` or `p`: This is a page for an item.
+ *   `sch` or `b`: This is a search or category page.
+ *   `itm` or `p`: This is a page for an item or category-item.
  *   `usr`: This is the page of a user.
  * Depending on which type of page it is, process that type of webpage.
  */

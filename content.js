@@ -1,3 +1,7 @@
+/********************************************************
+ *                   Browser Storage                    *
+ *******************************************************/
+
 let list = {
     sellers: [],
     items: [],
@@ -11,6 +15,18 @@ chrome.storage.local.get({
     processWebpage();
 });
 
+/**
+ * Saves the current list of hidden sellers and items to local storage.
+ */
+function updateStorageList() {
+    chrome.storage.local.set({
+        list: list
+    }, function () {
+        console.log('background.js updated list:');
+        console.log('websiteURL: ' + list.websiteURL);
+    });
+}
+
 chrome.storage.onChanged.addListener(function (changes, namespace) {
     for (var key in changes) {
         if (key === 'list') {
@@ -19,15 +35,28 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
     }
 });
 
+/********************************************************
+ *                   Process Webpage                    *
+ *******************************************************/
+
 /**
- * Extracts the 12-digit item number from a URL.
+ * Process Webpage
  * 
- * @param {string} url The URL of the item.
- * @returns {string} The 12-digit item number or an empty string if not found.
+ * This function checks the url for one of the following subdirectories:
+ * Ebay:
+ *   `sch` or `b`: This is a search or category page.
+ *   `itm` or `p`: This is a page for an item or category-item.
+ *   `usr`: This is the page of a user.
+ * Depending on which type of page it is, process that type of webpage.
  */
-function getItemNumber(url) {
-    const itemNumberMatch = url.match(/itm\/(\d{12})/) || url.match(/iid=(\d{12})/);
-    return itemNumberMatch && itemNumberMatch[1].length === 12 ? itemNumberMatch[1] : '';
+function processWebpage() {
+    if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..+?\/(sch|b)\/.+/.test(window.location.href)) {
+        processSearchPage();
+    } else if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..+?\/(itm|p)\/.+/.test(window.location.href)) {
+        processItemPage();
+    } else if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..+?\/usr\/.+/.test(window.location.href)) {
+        processUserPage();
+    }
 }
 
 /**
@@ -82,6 +111,48 @@ function processSearchPage() {
     let classList = 'hide-item-button eh-not-hidden';
     insertButton(30, 'Hide item from search results.', classList, $(divSelecter, currentList));
     $(divSelecter, currentList).on('click', '.hide-item-button', hideItem);
+}
+
+/**
+ * Extracts the 12-digit item number from a URL.
+ * 
+ * @param {string} url The URL of the item.
+ * @returns {string} The 12-digit item number or an empty string if not found.
+ */
+function getItemNumber(url) {
+    const itemNumberMatch = url.match(/itm\/(\d{12})/) || url.match(/iid=(\d{12})/);
+    return itemNumberMatch && itemNumberMatch[1].length === 12 ? itemNumberMatch[1] : '';
+}
+
+/**
+ * Hide Item
+ * 
+ * This function is called when the user clicks a button to hide an item from search results.
+ * It gets the item number and name from the elements,
+ * adds it to the list of hidden items,
+ * and removes the item from the search results page.
+ * @this {HTMLElement} The element that was clicked.
+ */
+function hideItem() {
+    var itemNumber = '';
+    var itemName = '';
+    if ($(this).parent('li').hasClass('sresult')) {
+        itemNumber = $(this).parent('li.sresult').attr('listingid');
+        itemName = $(this).siblings('h3').first().children('a').first().text();
+    } else {
+        let a = $(this).siblings('.s-item__info').first().children('.s-item__link').first();
+        itemNumber = getItemNumber($(a).attr('href'));
+        itemName = $(this).siblings('.s-item__info').first().children('a').first().children('h3').first().text();
+    }
+    // Add item to list of hidden items
+    if (itemNumber !== '') {
+        if (!list.items.includes(itemNumber)) {
+            list.items.push(itemNumber);
+        }
+        updateStorageList();
+    }
+    $(this).closest('li').remove();
+    console.log('item number ' + itemNumber + ' was hidden');
 }
 
 /**
@@ -143,57 +214,6 @@ function processUserPage() {
 }
 
 /**
- * Process Webpage
- * 
- * This function checks the url for one of the following subdirectories:
- * Ebay:
- *   `sch` or `b`: This is a search or category page.
- *   `itm` or `p`: This is a page for an item or category-item.
- *   `usr`: This is the page of a user.
- * Depending on which type of page it is, process that type of webpage.
- */
-function processWebpage() {
-    if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..+?\/(sch|b)\/.+/.test(window.location.href)) {
-        processSearchPage();
-    } else if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..+?\/(itm|p)\/.+/.test(window.location.href)) {
-        processItemPage();
-    } else if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..+?\/usr\/.+/.test(window.location.href)) {
-        processUserPage();
-    }
-}
-
-/**
- * Hide Item
- * 
- * This function is called when the user clicks a button to hide an item from search results.
- * It gets the item number and name from the elements,
- * adds it to the list of hidden items,
- * and removes the item from the search results page.
- * @this {HTMLElement} The element that was clicked.
- */
-function hideItem() {
-    var itemNumber = '';
-    var itemName = '';
-    if ($(this).parent('li').hasClass('sresult')) {
-        itemNumber = $(this).parent('li.sresult').attr('listingid');
-        itemName = $(this).siblings('h3').first().children('a').first().text();
-    } else {
-        let a = $(this).siblings('.s-item__info').first().children('.s-item__link').first();
-        itemNumber = getItemNumber($(a).attr('href'));
-        itemName = $(this).siblings('.s-item__info').first().children('a').first().children('h3').first().text();
-    }
-    // Add item to list of hidden items
-    if (itemNumber !== '') {
-        if (!list.items.includes(itemNumber)) {
-            list.items.push(itemNumber);
-        }
-        updateStorageList();
-    }
-    $(this).closest('li').remove();
-    console.log('item number ' + itemNumber + ' was hidden');
-}
-
-/**
  * Update Seller Hidden Status
  * 
  * This function is called when the user clicks a button to hide a seller from search results.
@@ -234,13 +254,3 @@ function insertButton(size, title, classList, contSelecter) {
     $(contSelecter).append(input);
 }
 
-/**
- * Saves the current list of hidden sellers and items to local storage.
- */
-function updateStorageList() {
-    chrome.storage.local.set({
-        list: list
-    }, function () {
-        console.log('content.js updated list.');
-    });
-}

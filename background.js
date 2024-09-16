@@ -1,8 +1,42 @@
+/********************************************************
+ *                   Browser Storage                    *
+ *******************************************************/
+
 let list = {
     sellers: [],
     items: [],
     websiteURL: ''
 };
+
+chrome.storage.local.get({
+    list: list
+}, function (data) {
+    list = data.list;
+});
+
+/**
+ * Saves the current list of hidden sellers and items to local storage.
+ */
+function updateStorageList() {
+    chrome.storage.local.set({
+        list: list
+    }, function () {
+        console.log('background.js updated list:');
+        console.log('websiteURL: ' + list.websiteURL);
+    });
+}
+
+chrome.storage.onChanged.addListener(function (changes, namespace) {
+    for (var key in changes) {
+        if (key === 'list') {
+            list = changes[key].newValue;
+        }
+    }
+});
+
+/********************************************************
+ *                Update URL Parameters                 *
+ *******************************************************/
 
 /**
  * Update URL Parameters
@@ -35,65 +69,6 @@ function updateParameters(url) {
 
     return urlObj.toString();
 }
-
-
-/**
- * Update Page Action Visibility
- * 
- * This function is called when the user navigates to a new page.
- * If the page is an ebay page, it shows the page action.
- * If the page is not an ebay page, it hides the page action.
- * @param {string} newUrl The URL of the new page.
- * @param {int} tabId The id of the tab that was updated.
- */
-function updatePageActionVisibility(newUrl, tabId) {
-    const isEbayPage = /^https:\/\/(www|.+?|www\..+?)\.ebay\..*/.test(newUrl);
-    const action = isEbayPage ? 'show' : 'hide';
-
-    chrome.pageAction[action](tabId);
-
-    if (isEbayPage && list.websiteURL === '') {
-        list.websiteURL = new URL(newUrl).origin;
-        updateStorageList();
-    }
-}
-
-
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-    updateVisibility(tab.url, tabId);
-});
-
-chrome.tabs.onActivated.addListener(function (activeInfo) {
-    chrome.tabs.get(activeInfo.tabId, function (tab) {
-        updateVisibility(tab.url, tab.id);
-    });
-});
-
-chrome.storage.local.get({
-    list: list
-}, function (data) {
-    list = data.list;
-});
-
-/**
- * Saves the current list of hidden sellers and items to local storage.
- */
-function updateStorageList() {
-    chrome.storage.local.set({
-        list: list
-    }, function () {
-        console.log('background.js updated list:');
-        console.log('websiteURL: ' + list.websiteURL);
-    });
-}
-
-chrome.storage.onChanged.addListener(function (changes, namespace) {
-    for (var key in changes) {
-        if (key === 'list') {
-            list = changes[key].newValue;
-        }
-    }
-});
 
 chrome.webRequest.onBeforeRequest.addListener(function (details) {
     if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..+?\/(sch|b)\/.+/.test(details.url)) {
@@ -128,3 +103,44 @@ chrome.webRequest.onBeforeRequest.addListener(function (details) {
 }, [
     'blocking'
 ]);
+
+/********************************************************
+ *                  Page Action Popup                   *
+ *******************************************************/
+
+/**
+ * Update Page Action Visibility
+ * 
+ * The page action changes the extension button from managing the extension
+ * to showing the item & seller popup as defined in popup.html.
+ * 
+ * This function is called when the user navigates to a new page.
+ * If the page is an ebay page, it enables the page action.
+ * If the page is not an ebay page, it hides the page action.
+ * 
+ * @param {string} newUrl The URL of the new page.
+ * @param {int} tabId The id of the tab that was updated.
+ */
+function updateVisibility(newUrl, tabId) {
+    if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..*/.test(newUrl)) {
+        chrome.pageAction.show(tabId, function() {
+            if (list.websiteURL === '') {
+                let websiteURL = new URL(newUrl.toString()).origin;
+                list.websiteURL = websiteURL;
+                updateStorageList();
+            }
+        });
+    } else {
+        chrome.pageAction.hide(tabId);
+    }
+}
+
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+    updateVisibility(tab.url, tabId);
+});
+
+chrome.tabs.onActivated.addListener(function (activeInfo) {
+    chrome.tabs.get(activeInfo.tabId, function (tab) {
+        updateVisibility(tab.url, tab.id);
+    });
+});

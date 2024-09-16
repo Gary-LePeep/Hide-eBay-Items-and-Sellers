@@ -3,7 +3,7 @@ $(function() {
     let list = {
         sellers: [],
         items: [],
-        ebayURL: ''
+        websiteURL: ''
     };
 
     chrome.storage.local.get({
@@ -26,6 +26,9 @@ $(function() {
         console.log('list: ' + list.toString());
     });
 
+    /**
+     * Saves the current list of hidden sellers and items to local storage.
+     */
     function updateStorageList() {
         chrome.storage.local.set({
             list: list
@@ -33,7 +36,7 @@ $(function() {
             console.log('popup.js updated list:');
             console.log('sellers: ' + list.sellers);
             console.log('items: ' + list.items);
-            console.log('ebayURL: ' + list.ebayURL);
+            console.log('websiteURL: ' + list.websiteURL);
         });
     }
 
@@ -60,6 +63,16 @@ $(function() {
         console.log('removed list item: '  + removedValue);
     });
 
+    /**
+     * Checks if a given string is a valid eBay seller user ID.
+     * 
+     * Returns false if the input is too short or too long,
+     * or if the user ID already exists in the list.
+     * Returns true if the input is valid.
+     * @param {object} inputGroup The input group containing the text input field.
+     * @param {string} userID The text entered by the user.
+     * @return {boolean} False if the input is invalid, true otherwise.
+     */
     function isValidUserID(inputGroup, userID) {
         let feedbackDiv = $(inputGroup).siblings('.invalid-feedback').first();
         if ((/[%\s\/]/.test(userID)) || (userID.length < 1) || (userID.length > 64)) {
@@ -77,6 +90,16 @@ $(function() {
         }
     }
 
+    /**
+     * Checks if a given string is a valid eBay item number.
+     * 
+     * Returns false if the input is not a 12-digit number,
+     * or if the item number already exists in the list.
+     * Returns true if the input is valid.
+     * @param {object} inputGroup The input group containing the text input field.
+     * @param {string} itemNumber The text entered by the user.
+     * @return {boolean} False if the input is invalid, true otherwise.
+     */
     function isValidItemNumber(inputGroup, itemNumber) {
         let feedbackDiv = $(inputGroup).siblings('.invalid-feedback').first();
         if (itemNumber.length !== 12 || !/^\d+$/.test(itemNumber)) {
@@ -94,6 +117,15 @@ $(function() {
         }
     }
 
+    /**
+     * Completes the process of adding a new item to the list.
+     * 
+     * If the list was empty, this function removes the default list item.
+     * It then adds the new item to the list, and scrolls to the bottom of the list.
+     * Finally, it updates the list stored in local storage.
+     * @param {object} listGroup The list group containing the new item.
+     * @param {string} value The text of the new item.
+     */
     function completeListUpdate(listGroup, value) {
         if ($(listGroup).children().length === 1) {
             let listItem = $(listGroup).children().first();
@@ -130,8 +162,14 @@ $(function() {
         }
     });
 
+    /**
+     * Adds a new list item to the list group specified by the selector.
+     * The value parameter is the text of the new item.
+     * @param {string} selector The selector of the list group to add the item to.
+     * @param {string} value The text of the new item.
+     */
     function addListItem(selector, value) {
-        let href = (list.ebayURL === '') ? 'https://ebay.com' : list.ebayURL;
+        let href = (list.websiteURL === '') ? 'https://ebay.com' : list.websiteURL;
         if ($(selector).hasClass('seller-list-group')) {
             href += '/usr/' + value;
         } else  {

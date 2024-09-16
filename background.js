@@ -70,6 +70,8 @@ function updateParameters(url) {
     return urlObj.toString();
 }
 
+// Add listener for ebay urls
+// If the url is a search or category page, update the url parameters with updateParameters
 chrome.webRequest.onBeforeRequest.addListener(function (details) {
     if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..+?\/(sch|b)\/.+/.test(details.url)) {
         let url = updateParameters(details.url);
@@ -111,7 +113,10 @@ chrome.webRequest.onBeforeRequest.addListener(function (details) {
 /**
  * Update Page Action Visibility
  * 
- * The page action changes the extension button from managing the extension
+ * Due to page_action being deprecated with manifest version 3,
+ * this workaround is needed to update the visibility of the popup.
+ * 
+ * The function changes the extension button from managing the extension
  * to showing the item & seller popup as defined in popup.html.
  * 
  * This function is called when the user navigates to a new page.
@@ -121,26 +126,27 @@ chrome.webRequest.onBeforeRequest.addListener(function (details) {
  * @param {string} newUrl The URL of the new page.
  * @param {int} tabId The id of the tab that was updated.
  */
-function updateVisibility(newUrl, tabId) {
-    if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..*/.test(newUrl)) {
-        chrome.pageAction.show(tabId, function() {
-            if (list.websiteURL === '') {
-                let websiteURL = new URL(newUrl.toString()).origin;
-                list.websiteURL = websiteURL;
-                updateStorageList();
-            }
-        });
-    } else {
-        chrome.pageAction.hide(tabId);
-    }
-}
 
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-    updateVisibility(tab.url, tabId);
-});
-
-chrome.tabs.onActivated.addListener(function (activeInfo) {
-    chrome.tabs.get(activeInfo.tabId, function (tab) {
-        updateVisibility(tab.url, tab.id);
+// Wrap in an onInstalled callback in order to avoid unnecessary work
+// every time the background script is run
+chrome.runtime.onInstalled.addListener(() => {
+    // Page actions are disabled by default and enabled on select tabs
+    chrome.action.disable();
+    
+    // Clear all rules to ensure only our expected rules are set
+    chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {
+        // Declare a rule to enable the action on example.com pages
+        let enableOnSelectHostsRule = {
+            conditions: [
+                new chrome.declarativeContent.PageStateMatcher({
+                    pageUrl: {urlMatches: '^https:\/\/(www|.+?|www\..+?)\.ebay\.'},
+                })
+            ],
+            actions: [new chrome.declarativeContent.ShowAction()],
+        };
+    
+        // Finally, apply our new array of rules
+        let rules = [enableOnSelectHostsRule];
+        chrome.declarativeContent.onPageChanged.addRules(rules);
     });
 });

@@ -137,19 +137,19 @@ if (navigator.userAgent.search("Chrome") > 0) {
     chrome.runtime.onInstalled.addListener(() => {
         // Page actions are disabled by default and enabled on select tabs
         chrome.action.disable();
-        
+
         // Clear all rules to ensure only our expected rules are set
         chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {
             // Declare a rule to enable the action on example.com pages
             let enableOnSelectHostsRule = {
                 conditions: [
                     new chrome.declarativeContent.PageStateMatcher({
-                        pageUrl: {urlMatches: '^https:\/\/(www|.+?|www\..+?)\.ebay\.'},
+                        pageUrl: { urlMatches: '^https:\/\/(www|.+?|www\..+?)\.ebay\.' },
                     })
                 ],
                 actions: [new chrome.declarativeContent.ShowAction()],
             };
-        
+
             // Finally, apply our new array of rules
             let rules = [enableOnSelectHostsRule];
             chrome.declarativeContent.onPageChanged.addRules(rules);
@@ -160,7 +160,7 @@ if (navigator.userAgent.search("Chrome") > 0) {
 else if (navigator.userAgent.search("Firefox") > 0) {
     function updateVisibility(url, tabId) {
         if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..*/.test(url)) {
-            chrome.pageAction.show(tabId, function() {
+            chrome.pageAction.show(tabId, function () {
                 if (list.ebayURL === '') {
                     let ebayURL = new URL(url.toString()).origin;
                     list.ebayURL = ebayURL;
@@ -173,13 +173,13 @@ else if (navigator.userAgent.search("Firefox") > 0) {
             chrome.action.disable();
         }
     }
-    
-    chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+
+    chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         updateVisibility(tab.url, tabId);
     });
-    
-    chrome.tabs.onActivated.addListener(function(activeInfo) {
-        chrome.tabs.get(activeInfo.tabId, function(tab) {
+
+    chrome.tabs.onActivated.addListener(function (activeInfo) {
+        chrome.tabs.get(activeInfo.tabId, function (tab) {
             updateVisibility(tab.url, tab.id);
         });
     });

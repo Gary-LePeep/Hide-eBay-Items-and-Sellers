@@ -4,27 +4,22 @@
   "version": "1.0.0",
   "description": "Hide items and sellers you don't like from appearing in eBay search and category results.",
   "icons": {
-    "128": "icon128.png",
-    "48": "icon48.png",
-    "16": "icon16.png"
+    "128": "src/resources/icon128.png",
+    "48": "src/resources/icon48.png",
+    "16": "src/resources/icon16.png"
   },
   "page_action": {
-    "default_icon": "icon16.png",
-    "default_popup": "popup.html"
+    "default_icon": "src/resources/icon16.png",
+    "default_popup": "src/content/popup.html"
   },
   "action": {
-    "default_icon": "icon16.png",
-    "default_popup": "popup.html"
+    "default_icon": "src/resources/icon16.png",
+    "default_popup": "src/content/popup.html"
   },
   "content_scripts": [
     {
-      "js": [
-        "jquery-3.4.1.min.js",
-        "content.js"
-      ],
-      "css": [
-        "css/content.css"
-      ],
+      "js": ["src/resources/jquery-3.4.1.min.js", "src/content/content.js"],
+      "css": ["src/content/css/content.css"],
       "matches": [
         "https://*.ebay.com/*",
         "https://*.ebay.com.au/*",
@@ -49,19 +44,13 @@
     }
   ],
   "background": {
-    "scripts": [
-      "background.js"
-    ],
-    "service_worker": "background.js"
+    "scripts": ["src/background/background.js"],
+    "service_worker": "src/background/background.js"
   },
   "web_accessible_resources": [
     {
-      "resources": [
-        "icon48.png"
-      ],
-      "matches": [
-        "*://*/*"
-      ]
+      "resources": ["src/resources/icon48.png"],
+      "matches": ["*://*/*"]
     }
   ],
   "permissions": [

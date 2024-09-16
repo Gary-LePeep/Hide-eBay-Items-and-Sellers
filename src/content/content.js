@@ -22,7 +22,7 @@ function updateStorageList() {
     chrome.storage.local.set({
         list: list
     }, function () {
-        console.log('background.js updated list:');
+        console.log('src/background/background.js updated list:');
         console.log('websiteURL: ' + list.websiteURL);
     });
 }
@@ -249,7 +249,7 @@ function insertButton(size, title, classList, contSelecter) {
         height: size,
         title: title,
         alt: 'Hide',
-        src: chrome.runtime.getURL('icon48.png'),
+        src: chrome.runtime.getURL('src/resources/icon48.png'),
     });
     $(contSelecter).append(input);
 }

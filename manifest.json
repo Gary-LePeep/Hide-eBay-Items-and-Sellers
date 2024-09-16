@@ -8,6 +8,10 @@
     "48": "icon48.png",
     "16": "icon16.png"
   },
+  "page_action": {
+    "default_icon": "icon16.png",
+    "default_popup": "popup.html"
+  },
   "action": {
     "default_icon": "icon16.png",
     "default_popup": "popup.html"
@@ -48,8 +52,7 @@
     "scripts": [
       "background.js"
     ],
-    "service_worker": "background.js",
-    "persistent": true
+    "service_worker": "background.js"
   },
   "web_accessible_resources": [
     {
@@ -66,8 +69,7 @@
     "unlimitedStorage",
     "tabs",
     "webRequest",
-    "webRequestBlocking",
-    "declarativeContent"
+    "webRequestBlocking"
   ],
   "host_permissions": [
     "https://*.ebay.com/*",

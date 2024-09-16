@@ -18,6 +18,7 @@ Why is this extension helpful? Well currently you can't hide individual items on
 - Setting to hide sellers with low review count
 - Setting to optionally hide sponsored items
 - Eventually expand to other sites, eg. Amazon, BestBuy, Adorama...
+- Eventually expand to other browsers, eg. Edge, Safari...
 
 ## Contributing
 Contributions are welcome! If you'd like to contribute to the project, please clone the repository and submit a pull request with your changes.

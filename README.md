@@ -26,5 +26,18 @@ Contributions are welcome! If you'd like to contribute to the project, please cl
 ## Support
 If you have any questions or need help, please [open an issue](https://github.com/ebay-hide-items-and-sellers/ebay-hide-items-and-sellers/issues) or send me an email at [my masked email address](mailto:n7bvdoj73@mozmail.com).
 
+## Running locally
+You must have npm installed to transpile the typescript files.
+
+Once you have cloned the repository, run `npm install` to install the dependencies.
+
+When you make any changes, run `npm build`. This command will:
+
+1. Delete the `dist` folder if it exists
+2. Transpile the typescript files to the `dist` folder
+3. Copy the other assets to the `dist` folder
+
+Then, load the `dist` folder in your browser as a developer extension.
+
 ## License
 This project is licensed under the Mozilla Public License (MPL) version 2.0

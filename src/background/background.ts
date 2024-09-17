@@ -161,9 +161,9 @@ else if (navigator.userAgent.search("Firefox") > 0) {
     function updateVisibility(url, tabId) {
         if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..*/.test(url)) {
             chrome.pageAction.show(tabId, function () {
-                if (list.ebayURL === '') {
+                if (list.websiteURL === '') {
                     let ebayURL = new URL(url.toString()).origin;
-                    list.ebayURL = ebayURL;
+                    list.websiteURL = ebayURL;
                     updateStorageList();
                 }
             });

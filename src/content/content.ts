@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 /********************************************************
  *                   Browser Storage                    *
  *******************************************************/
@@ -50,6 +52,7 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
  * Depending on which type of page it is, process that type of webpage.
  */
 function processWebpage() {
+    console.warn("here");
     if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..+?\/(sch|b)\/.+/.test(window.location.href)) {
         processSearchPage();
     } else if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..+?\/(itm|p)\/.+/.test(window.location.href)) {
@@ -93,14 +96,14 @@ function processSearchPage() {
     // Hide any items that have already been previously hidden.
     if (divSelecter === 'li.sresult') {
         $('li.sresult', currentList).each(function () {
-            let itemNumber = $(this).attr('listingid');
+            let itemNumber: string = $(this).attr('listingid') || '';
             if (itemNumber !== '' && list.items.includes(itemNumber)) {
                 $(this).closest('li').remove();
             }
         });
     } else {
         $('li .s-item__info .s-item__link', currentList).each(function () {
-            let itemNumber = getItemNumber($(this).attr('href'));
+            let itemNumber: string = getItemNumber($(this).attr('href'));
             if (itemNumber !== '' && list.items.includes(itemNumber)) {
                 $(this).closest('li').remove();
             }
@@ -110,7 +113,7 @@ function processSearchPage() {
     // Insert hide-item-button onto each item in search results
     let classList = 'hide-item-button eh-not-hidden';
     insertButton(30, 'Hide item from search results.', classList, $(divSelecter, currentList));
-    $(divSelecter, currentList).on('click', '.hide-item-button', hideItem);
+    $($(divSelecter, currentList)).on('click', '.hide-item-button', hideItem);
 }
 
 /**
@@ -165,16 +168,16 @@ function hideItem() {
  */
 function processItemPage() {
     // Extract seller user Id from elements
-    let sellerInfoDivs = document.getElementsByClassName('x-sellercard-atf__info__about-seller')
+    let sellerInfoDivs: HTMLCollectionOf<HTMLDivElement> = document.getElementsByClassName('x-sellercard-atf__info__about-seller') as HTMLCollectionOf<HTMLDivElement>
     if (sellerInfoDivs.length != 1) {
         console.warn(`Expected 1 seller on this item page, but actually found ${sellerInfoDivs.length}:`, sellerInfoDivs)
     }
     let sellerUserID = sellerInfoDivs[0].innerText.split('\n')[0]
 
     // Add hide seller button. Modify the div to make the button look good next to the name
-    userIdHideButtonDiv = document.createElement('div')
+    let userIdHideButtonDiv = document.createElement('div')
     sellerInfoDivs[0].appendChild(userIdHideButtonDiv)
-    userIdHideButtonDiv.style = `position: relative; left: 25px; top: -2px`
+    userIdHideButtonDiv.style.cssText = `position: relative; left: 25px; top: -2px`
 
     let classList = `hide-seller-button ${list.sellers.includes(sellerUserID) ? 'eh-is-hidden' : 'eh-not-hidden'}`;
     insertButton(22, 'Hide seller\'s items from search results.', classList, userIdHideButtonDiv);
@@ -201,9 +204,9 @@ function processUserPage() {
     let sellerUserID = sellerInfoDivs[0].getElementsByTagName("h1")[0].getElementsByTagName("a")[0].innerText;
 
     // Add hide seller button. Modify the div to make the button look good next to the name
-    userIdHideButtonDiv = document.createElement('div')
+    let userIdHideButtonDiv = document.createElement('div')
     sellerInfoDivs[0].getElementsByTagName("h1")[0].appendChild(userIdHideButtonDiv)
-    userIdHideButtonDiv.style = `position: relative; left: 35px; top: 2px`
+    userIdHideButtonDiv.style.cssText = `position: relative; left: 35px; top: 2px`
 
     let classList = `hide-seller-button ${list.sellers.includes(sellerUserID) ? 'eh-is-hidden' : 'eh-not-hidden'}`;
     insertButton(30, 'Hide seller\'s items from search results.', classList, userIdHideButtonDiv);

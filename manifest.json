@@ -56,9 +56,7 @@
   "permissions": [
     "storage",
     "unlimitedStorage",
-    "tabs",
-    "webRequest",
-    "webRequestBlocking"
+    "tabs"
   ],
   "host_permissions": [
     "https://*.ebay.com/*",

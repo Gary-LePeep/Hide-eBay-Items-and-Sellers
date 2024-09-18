@@ -16,6 +16,7 @@ Why is this extension helpful? Well currently you can't hide individual items on
 
 - Setting to hide sellers with low ratings
 - Setting to hide sellers with low review count
+- Show how many items hidden from the page you're on, and give an option to unhide them for the moment
 - Setting to optionally hide sponsored items
 - Eventually expand to other sites, eg. Amazon, Facebook, BestBuy, Adorama...
 - Eventually expand to other browsers, eg. Edge, Safari...

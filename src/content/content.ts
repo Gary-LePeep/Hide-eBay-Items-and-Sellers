@@ -111,7 +111,6 @@ function processSearchPage() {
     $('li .s-item__info .s-item__seller-info-text', currentList).each(function () {
         let sellerInfoString: string = $(this).text();
         let sellerInfo = processSellerInfo(sellerInfoString);
-        console.warn(sellerInfo);
         if (sellerInfo.sellerName !== '' && contentList.sellers.includes(sellerInfo.sellerName)) {
             $(this).closest('li').remove();
         }
@@ -186,6 +185,7 @@ function processItemPage() {
     let sellerInfoDivs: HTMLCollectionOf<HTMLDivElement> = document.getElementsByClassName('x-sellercard-atf__info__about-seller') as HTMLCollectionOf<HTMLDivElement>
     if (sellerInfoDivs.length != 1) {
         console.warn(`Expected 1 seller on this item page, but actually found ${sellerInfoDivs.length}:`, sellerInfoDivs)
+        return;
     }
     let sellerUserID = sellerInfoDivs[0].innerText.split('\n')[0].toLowerCase()
 
@@ -215,6 +215,7 @@ function processUserPage() {
     let sellerInfoDivs = document.getElementsByClassName('str-seller-card__store-name')
     if (sellerInfoDivs.length != 1) {
         console.warn(`Expected 1 user on this user page, but actually found ${sellerInfoDivs.length}:`, sellerInfoDivs)
+        return;
     }
     let sellerUserID = sellerInfoDivs[0].getElementsByTagName("h1")[0].getElementsByTagName("a")[0].innerText.toLowerCase();
 

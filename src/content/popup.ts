@@ -1,4 +1,4 @@
-$(function() {
+$(function () {
 
     let list = {
         sellers: [],
@@ -8,18 +8,18 @@ $(function() {
 
     chrome.storage.local.get({
         list: list
-    }, function(data) {
+    }, function (data) {
         list = data.list;
         if (list.sellers.length > 0) {
             $('.seller-list-group .default-list-item').remove();
-            $.each(list.sellers, function(index, value) {
+            $.each(list.sellers, function (index, value) {
                 addListItem('.seller-list-group', value);
             });
         }
 
         if (list.items.length > 0) {
             $('.item-list-group .default-list-item').remove();
-            $.each(list.items, function(index, value) {
+            $.each(list.items, function (index, value) {
                 addListItem('.item-list-group', value);
             });
         }
@@ -32,7 +32,7 @@ $(function() {
     function updateStorageList() {
         chrome.storage.local.set({
             list: list
-        }, function() {
+        }, function () {
             console.log('popup.js updated list:');
             console.log('sellers: ' + list.sellers);
             console.log('items: ' + list.items);
@@ -40,16 +40,16 @@ $(function() {
         });
     }
 
-    $('.list-group').on('click', '.remove-button', function() {
+    $('.list-group').on('click', '.remove-button', function () {
         let listGroup = $(this).closest('ul');
         let listItem = $(this).parent().get(0);
         let removedValue = $(listItem).find('a').first().text();
         if ($(listGroup).hasClass('seller-list-group')) {
-            list.sellers = $.grep(list.sellers, function(value) {
+            list.sellers = $.grep(list.sellers, function (value) {
                 return value != removedValue;
             });
         } else {
-            list.items = $.grep(list.items, function(value) {
+            list.items = $.grep(list.items, function (value) {
                 return value != removedValue;
             });
         }
@@ -60,7 +60,7 @@ $(function() {
             let message = ($(listGroup).hasClass('seller-list-group')) ? 'No sellers hidden...' : 'No items hidden...';
             $(listGroup).html('<li class="list-group-item align-items-center default-list-item">' + message + '</li>');
         }
-        console.log('removed list item: '  + removedValue);
+        console.log('removed list item: ' + removedValue);
     });
 
     /**
@@ -110,7 +110,7 @@ $(function() {
             $('input', inputGroup).addClass('is-invalid');
             $(feedbackDiv).addClass('d-block').text('You have already added this item to the list.');
             return false;
-        } else  {
+        } else {
             $('input', inputGroup).removeClass('is-invalid');
             $(feedbackDiv).removeClass('d-block');
             return true;
@@ -144,7 +144,7 @@ $(function() {
         updateStorageList();
     }
 
-    $('.hide-button').click(function(e) {
+    $('.hide-button').click(function (e) {
         let inputGroup = $(this).closest('.input-group');
         let input = $(inputGroup).children('input').first();
         if ($(input).hasClass('userid-input')) {
@@ -172,15 +172,15 @@ $(function() {
         let href = (list.websiteURL === '') ? 'https://ebay.com' : list.websiteURL;
         if ($(selector).hasClass('seller-list-group')) {
             href += '/usr/' + value;
-        } else  {
+        } else {
             href += '/itm/' + value;
         }
         let listItem = '<li class="list-group-item d-flex justify-content-between align-items-center">' +
-                            '<div class="link-container">' +
-                                '<a class="list-item-link text-danger" target="_blank" href="' + href + '">' + value + '</a>' +
-                            '</div>' +
-                            '<button type="button" name="remove" class="btn btn-outline-danger py-0 remove-button">x</button>' +
-                        '</li>';
+            '<div class="link-container">' +
+            '<a class="list-item-link text-danger" target="_blank" href="' + href + '">' + value + '</a>' +
+            '</div>' +
+            '<button type="button" name="remove" class="btn btn-outline-danger py-0 remove-button">x</button>' +
+            '</li>';
 
         $(selector).append(listItem);
         console.log('added list item: ' + value);

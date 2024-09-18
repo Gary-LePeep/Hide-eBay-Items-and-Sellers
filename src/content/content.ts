@@ -2,16 +2,16 @@
  *                   Browser Storage                    *
  *******************************************************/
 
-let list = {
+let contentList = {
     sellers: [],
     items: [],
     websiteURL: ''
 };
 
 chrome.storage.local.get({
-    list: list
+    list: contentList
 }, function (data) {
-    list = data.list;
+    contentList = data.list;
     processWebpage();
 });
 
@@ -20,17 +20,17 @@ chrome.storage.local.get({
  */
 function updateStorageList() {
     chrome.storage.local.set({
-        list: list
+        list: contentList
     }, function () {
-        console.log('background.js updated list:');
-        console.log('websiteURL: ' + list.websiteURL);
+        console.log('src/background/background.js updated list:');
+        console.log('websiteURL: ' + contentList.websiteURL);
     });
 }
 
 chrome.storage.onChanged.addListener(function (changes, namespace) {
     for (var key in changes) {
         if (key === 'list') {
-            list = changes[key].newValue;
+            contentList = changes[key].newValue;
         }
     }
 });
@@ -93,24 +93,41 @@ function processSearchPage() {
     // Hide any items that have already been previously hidden.
     if (divSelecter === 'li.sresult') {
         $('li.sresult', currentList).each(function () {
-            let itemNumber = $(this).attr('listingid');
-            if (itemNumber !== '' && list.items.includes(itemNumber)) {
+            let itemNumber: string = $(this).attr('listingid') || '';
+            if (itemNumber !== '' && contentList.items.includes(itemNumber)) {
                 $(this).closest('li').remove();
             }
         });
     } else {
         $('li .s-item__info .s-item__link', currentList).each(function () {
-            let itemNumber = getItemNumber($(this).attr('href'));
-            if (itemNumber !== '' && list.items.includes(itemNumber)) {
+            let itemNumber: string = getItemNumber($(this).attr('href'));
+            if (itemNumber !== '' && contentList.items.includes(itemNumber)) {
                 $(this).closest('li').remove();
             }
         });
     }
 
+    // Hide any sellers that have already been previously hidden.
+    $('li .s-item__info .s-item__seller-info-text', currentList).each(function () {
+        let sellerInfoString: string = $(this).text();
+        let sellerInfo = processSellerInfo(sellerInfoString);
+        if (sellerInfo.sellerName !== '' && contentList.sellers.includes(sellerInfo.sellerName)) {
+            $(this).closest('li').remove();
+        }
+    });
+
     // Insert hide-item-button onto each item in search results
     let classList = 'hide-item-button eh-not-hidden';
     insertButton(30, 'Hide item from search results.', classList, $(divSelecter, currentList));
-    $(divSelecter, currentList).on('click', '.hide-item-button', hideItem);
+    $($(divSelecter, currentList)).on('click', '.hide-item-button', hideItem);
+}
+
+function processSellerInfo(sellerInfo: string) {
+    return {
+        sellerName: sellerInfo.split(' ')[0].toLowerCase(),
+        sellerReviewCount: sellerInfo.split(' ')[1].replace(/[()]/g, ''),
+        sellerRating: parseFloat(sellerInfo.split(' ')[2])
+    }
 }
 
 /**
@@ -146,8 +163,8 @@ function hideItem() {
     }
     // Add item to list of hidden items
     if (itemNumber !== '') {
-        if (!list.items.includes(itemNumber)) {
-            list.items.push(itemNumber);
+        if (!contentList.items.includes(itemNumber)) {
+            contentList.items.push(itemNumber);
         }
         updateStorageList();
     }
@@ -165,18 +182,19 @@ function hideItem() {
  */
 function processItemPage() {
     // Extract seller user Id from elements
-    let sellerInfoDivs = document.getElementsByClassName('x-sellercard-atf__info__about-seller')
+    let sellerInfoDivs: HTMLCollectionOf<HTMLDivElement> = document.getElementsByClassName('x-sellercard-atf__info__about-seller') as HTMLCollectionOf<HTMLDivElement>
     if (sellerInfoDivs.length != 1) {
         console.warn(`Expected 1 seller on this item page, but actually found ${sellerInfoDivs.length}:`, sellerInfoDivs)
+        return;
     }
-    let sellerUserID = sellerInfoDivs[0].innerText.split('\n')[0]
+    let sellerUserID = sellerInfoDivs[0].innerText.split('\n')[0].toLowerCase()
 
     // Add hide seller button. Modify the div to make the button look good next to the name
-    userIdHideButtonDiv = document.createElement('div')
+    let userIdHideButtonDiv = document.createElement('div')
     sellerInfoDivs[0].appendChild(userIdHideButtonDiv)
-    userIdHideButtonDiv.style = `position: relative; left: 25px; top: -2px`
+    userIdHideButtonDiv.style.cssText = `position: relative; left: 25px; top: -2px`
 
-    let classList = `hide-seller-button ${list.sellers.includes(sellerUserID) ? 'eh-is-hidden' : 'eh-not-hidden'}`;
+    let classList = `hide-seller-button ${contentList.sellers.includes(sellerUserID) ? 'eh-is-hidden' : 'eh-not-hidden'}`;
     insertButton(22, 'Hide seller\'s items from search results.', classList, userIdHideButtonDiv);
     $(userIdHideButtonDiv).on('click', '.hide-seller-button', function () {
         $(this).toggleClass('eh-is-hidden eh-not-hidden');
@@ -197,15 +215,16 @@ function processUserPage() {
     let sellerInfoDivs = document.getElementsByClassName('str-seller-card__store-name')
     if (sellerInfoDivs.length != 1) {
         console.warn(`Expected 1 user on this user page, but actually found ${sellerInfoDivs.length}:`, sellerInfoDivs)
+        return;
     }
-    let sellerUserID = sellerInfoDivs[0].getElementsByTagName("h1")[0].getElementsByTagName("a")[0].innerText;
+    let sellerUserID = sellerInfoDivs[0].getElementsByTagName("h1")[0].getElementsByTagName("a")[0].innerText.toLowerCase();
 
     // Add hide seller button. Modify the div to make the button look good next to the name
-    userIdHideButtonDiv = document.createElement('div')
+    let userIdHideButtonDiv = document.createElement('div')
     sellerInfoDivs[0].getElementsByTagName("h1")[0].appendChild(userIdHideButtonDiv)
-    userIdHideButtonDiv.style = `position: relative; left: 35px; top: 2px`
+    userIdHideButtonDiv.style.cssText = `position: relative; left: 35px; top: 2px`
 
-    let classList = `hide-seller-button ${list.sellers.includes(sellerUserID) ? 'eh-is-hidden' : 'eh-not-hidden'}`;
+    let classList = `hide-seller-button ${contentList.sellers.includes(sellerUserID) ? 'eh-is-hidden' : 'eh-not-hidden'}`;
     insertButton(30, 'Hide seller\'s items from search results.', classList, userIdHideButtonDiv);
     $(userIdHideButtonDiv).on('click', '.hide-seller-button', function () {
         $(this).toggleClass('eh-is-hidden eh-not-hidden');
@@ -224,12 +243,12 @@ function processUserPage() {
 function updateSellerHiddenStatus(sellerUserID) {
     console.log('updating seller status');
     console.log(sellerUserID);
-    if (list.sellers.includes(sellerUserID)) {
-        list.sellers = $.grep(list.sellers, function (value) {
+    if (contentList.sellers.includes(sellerUserID)) {
+        contentList.sellers = $.grep(contentList.sellers, function (value) {
             return value != sellerUserID;
         });
     } else {
-        list.sellers.push(sellerUserID);
+        contentList.sellers.push(sellerUserID);
     }
     updateStorageList();
 }
@@ -249,7 +268,7 @@ function insertButton(size, title, classList, contSelecter) {
         height: size,
         title: title,
         alt: 'Hide',
-        src: chrome.runtime.getURL('icon48.png'),
+        src: chrome.runtime.getURL('src/resources/icon48.png'),
     });
     $(contSelecter).append(input);
 }

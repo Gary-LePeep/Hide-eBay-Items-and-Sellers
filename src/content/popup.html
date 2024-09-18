@@ -14,15 +14,40 @@
 <body>
     <nav>
         <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
-            <a class="nav-item nav-link active" id="nav-sellers-tab" data-toggle="tab" href="#nav-sellers" role="tab"
-                aria-controls="nav-home" aria-selected="true">Sellers</a>
+            <a class="nav-item nav-link active" id="nav-settings-tab" data-toggle="tab" href="#nav-settings" role="tab"
+                aria-controls="nav-home" aria-selected="true">Settings</a>
+            <a class="nav-item nav-link" id="nav-sellers-tab" data-toggle="tab" href="#nav-sellers" role="tab"
+                aria-controls="nav-home" aria-selected="false">Sellers</a>
             <a class="nav-item nav-link" id="nav-items-tab" data-toggle="tab" href="#nav-items" role="tab"
                 aria-controls="nav-profile" aria-selected="false">Items</a>
         </div>
     </nav>
     <div class="container">
         <div class="tab-content" id="nav-tabContent">
-            <div class="tab-pane fade show active" id="nav-sellers" role="tabpanel" aria-labelledby="nav-sellers-tab">
+            <div class="tab-pane fade show active" id="nav-settings" role="tabpanel" aria-labelledby="nav-settings-tab">
+                <div class="container">
+                    <h3>Settings</h3>
+                    <input type="checkbox" id="hideSponsoredCheck" name="hideSponsoredCheck">
+                    <label for="hideSponsoredCheck"> Hide Sponsored Items</label>
+                    <br>
+                    <br>
+                    <label>Hide sellers with:</label>
+                    <br>
+                    <label for="hideFewerThanReviews">Fewer than</label>
+                    <input type="text" id="hideFewerThanReviews" name="hideFewerThanReviews" size="1" value="0">
+                    <label for="hideFewerThanReviews">reviews</label>
+                    <label id="paddingLabel" style="width: 6px"></label>
+                    <input type="submit" value="OK">
+                    <br>
+                    <label for="hideLowerThanReviews">Reviews below</label>
+                    <input type="text" id="hideLowerThanReviews" name="hideLowerThanReviews" size="1" value="0">
+                    <label for="hideLowerThanReviews">%</label>
+                    <label id="paddingLabel" style="width: 20px"></label>
+                    <input type="submit" value="OK">
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="nav-sellers" role="tabpanel" aria-labelledby="nav-sellers-tab">
                 <div class="container">
                     <!-- <h3>Hidden Sellers</h3> -->
                     <ul class="list-group list-group-flush seller-list-group">

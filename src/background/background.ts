@@ -1,35 +1,43 @@
 /********************************************************
  *                   Browser Storage                    *
  *******************************************************/
-
-let list = {
-    sellers: [],
-    items: [],
-    websiteURL: ''
-};
-
-chrome.storage.local.get({
-    list: list
-}, function (data) {
-    list = data.list;
-});
+let backgroundStorageObject = {
+    ebay: {
+        sellers: [],
+        items: [],
+        hideSponsored: false,
+        hideSellersFewerThanReviews: 0,
+        hideSellersLowerThanRating: 0,
+        base_url: '',
+    }
+}
 
 /**
  * Saves the current list of hidden sellers and items to local storage.
  */
 function updateStorageListBackground() {
     chrome.storage.local.set({
-        list: list
+        backgroundStorageObject: backgroundStorageObject
     }, function () {
-        console.log('background.js updated list:');
-        console.log('websiteURL: ' + list.websiteURL);
+        console.warn('base url:', window.location.origin);
+        console.log('background.js updated storage object:', JSON.stringify(backgroundStorageObject));
     });
 }
 
+/**
+ * Initializes backgroundStorageObject from data, if it exists.
+ * If the object is changed in storage from another script, update backgroundStorageObject
+ */
+chrome.storage.local.get({
+    backgroundStorageObject: backgroundStorageObject
+}, function (data) {
+    backgroundStorageObject = data.backgroundStorageObject;
+});
+
 chrome.storage.onChanged.addListener(function (changes, namespace) {
     for (var key in changes) {
-        if (key === 'list') {
-            list = changes[key].newValue;
+        if (key === 'easyBlocktorageObject') {
+            backgroundStorageObject = changes[key].newValue;
         }
     }
 });
@@ -90,9 +98,9 @@ else if (navigator.userAgent.search("Firefox") > 0) {
     function updateVisibility(url, tabId) {
         if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..*/.test(url)) {
             chrome.pageAction.show(tabId, function () {
-                if (list.websiteURL === '') {
+                if (backgroundStorageObject.ebay.base_url === '') {
                     let ebayURL = new URL(url.toString()).origin;
-                    list.websiteURL = ebayURL;
+                    backgroundStorageObject.ebay.base_url = ebayURL;
                     updateStorageListBackground();
                 }
             });

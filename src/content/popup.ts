@@ -1,29 +1,37 @@
 $(function () {
-
-    let list = {
-        sellers: [],
-        items: [],
-        websiteURL: ''
-    };
+    let backgroundStorageObject = {
+        ebay: {
+            sellers: [],
+            items: [],
+            hideSponsored: false,
+            hideSellersFewerThanReviews: 0,
+            hideSellersLowerThanRating: 0,
+            base_url: '',
+        }
+    }
 
     chrome.storage.local.get({
-        list: list
+        backgroundStorageObject: backgroundStorageObject
     }, function (data) {
-        list = data.list;
-        if (list.sellers.length > 0) {
+        backgroundStorageObject = data.backgroundStorageObject;
+        if (backgroundStorageObject.ebay.sellers.length > 0) {
             $('.seller-list-group .default-list-item').remove();
-            $.each(list.sellers, function (index, value) {
+            $.each(backgroundStorageObject.ebay.sellers, function (index, value) {
                 addListItem('.seller-list-group', value);
             });
         }
 
-        if (list.items.length > 0) {
+        if (backgroundStorageObject.ebay.items.length > 0) {
             $('.item-list-group .default-list-item').remove();
-            $.each(list.items, function (index, value) {
+            $.each(backgroundStorageObject.ebay.items, function (index, value) {
                 addListItem('.item-list-group', value);
             });
         }
-        console.log('list: ' + list.toString());
+        console.log('backgroundStorageObject: ' + JSON.stringify(backgroundStorageObject));
+    });
+
+    window.addEventListener('load', () => {
+        window.focus();
     });
 
     /**
@@ -31,12 +39,9 @@ $(function () {
      */
     function updateStorageList() {
         chrome.storage.local.set({
-            list: list
+            backgroundStorageObject: backgroundStorageObject
         }, function () {
-            console.log('popup.js updated list:');
-            console.log('sellers: ' + list.sellers);
-            console.log('items: ' + list.items);
-            console.log('websiteURL: ' + list.websiteURL);
+            console.log('popup.js updated backgroundStorageObject:', JSON.stringify(backgroundStorageObject));
         });
     }
 
@@ -45,11 +50,11 @@ $(function () {
         let listItem = $(this).parent().get(0);
         let removedValue = $(listItem).find('a').first().text();
         if ($(listGroup).hasClass('seller-list-group')) {
-            list.sellers = $.grep(list.sellers, function (value) {
+            backgroundStorageObject.ebay.sellers = $.grep(backgroundStorageObject.ebay.sellers, function (value) {
                 return value != removedValue;
             });
         } else {
-            list.items = $.grep(list.items, function (value) {
+            backgroundStorageObject.ebay.items = $.grep(backgroundStorageObject.ebay.items, function (value) {
                 return value != removedValue;
             });
         }
@@ -79,7 +84,7 @@ $(function () {
             $('input', inputGroup).addClass('is-invalid');
             $(feedbackDiv).addClass('d-block').text('Please provide a valid eBay seller user ID.');
             return false;
-        } else if (list.sellers.includes(userID)) {
+        } else if (backgroundStorageObject.ebay.sellers.includes(userID)) {
             $('input', inputGroup).addClass('is-invalid');
             $(feedbackDiv).addClass('d-block').text('You have already added this seller to the list.');
             return false;
@@ -106,7 +111,7 @@ $(function () {
             $('input', inputGroup).addClass('is-invalid');
             $(feedbackDiv).addClass('d-block').text('Please provide a valid eBay item number.');
             return false;
-        } else if (list.items.includes(itemNumber)) {
+        } else if (backgroundStorageObject.ebay.items.includes(itemNumber)) {
             $('input', inputGroup).addClass('is-invalid');
             $(feedbackDiv).addClass('d-block').text('You have already added this item to the list.');
             return false;
@@ -137,9 +142,9 @@ $(function () {
         let bottom = $('li:last-child', listGroup).offset().top;
         $('li:last-child', listGroup).scrollTop(bottom);
         if ($(listGroup).hasClass('seller-list-group')) {
-            list.sellers.push(value);
+            backgroundStorageObject.ebay.sellers.push(value);
         } else {
-            list.items.push(value);
+            backgroundStorageObject.ebay.items.push(value);
         }
         updateStorageList();
     }
@@ -169,7 +174,7 @@ $(function () {
      * @param {string} value The text of the new item.
      */
     function addListItem(selector, value) {
-        let href = (list.websiteURL === '') ? 'https://ebay.com' : list.websiteURL;
+        let href = (backgroundStorageObject.ebay.base_url === '') ? 'https://ebay.com' : backgroundStorageObject.ebay.base_url;
         if ($(selector).hasClass('seller-list-group')) {
             href += '/usr/' + value;
         } else {

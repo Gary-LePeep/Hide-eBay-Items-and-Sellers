@@ -190,13 +190,13 @@ function processItemPage() {
     let sellerUserID = sellerInfoDivs[0].innerText.split('\n')[0].toLowerCase()
 
     // Add hide seller button. Modify the div to make the button look good next to the name
-    let userIdHideButtonDiv = document.createElement('div')
-    sellerInfoDivs[0].appendChild(userIdHideButtonDiv)
-    userIdHideButtonDiv.style.cssText = `position: relative; left: 25px; top: -2px`
+    let userIdHideButtonUl = document.createElement('ul')
+    sellerInfoDivs[0].appendChild(userIdHideButtonUl)
+    userIdHideButtonUl.style.cssText = `position: relative; left: 25px; top: -2px`
 
     let classList = `hide-seller-button ${contentList.sellers.includes(sellerUserID) ? 'eh-is-hidden' : 'eh-not-hidden'}`;
-    insertButton(22, 'Hide seller\'s items from search results.', classList, userIdHideButtonDiv);
-    $(userIdHideButtonDiv).on('click', '.hide-seller-button', function () {
+    insertButton(22, 'Hide seller\'s items from search results.', classList, userIdHideButtonUl);
+    $(userIdHideButtonUl).on('click', '.hide-seller-button', function () {
         $(this).toggleClass('eh-is-hidden eh-not-hidden');
         updateSellerHiddenStatus(sellerUserID);
     });
@@ -220,13 +220,13 @@ function processUserPage() {
     let sellerUserID = sellerInfoDivs[0].getElementsByTagName("h1")[0].getElementsByTagName("a")[0].innerText.toLowerCase();
 
     // Add hide seller button. Modify the div to make the button look good next to the name
-    let userIdHideButtonDiv = document.createElement('div')
-    sellerInfoDivs[0].getElementsByTagName("h1")[0].appendChild(userIdHideButtonDiv)
-    userIdHideButtonDiv.style.cssText = `position: relative; left: 35px; top: 2px`
+    let userIdHideButtonUl = document.createElement('ul')
+    sellerInfoDivs[0].appendChild(userIdHideButtonUl)
+    userIdHideButtonUl.style.cssText = `position: relative; left: 35px; top: 2px`
 
     let classList = `hide-seller-button ${contentList.sellers.includes(sellerUserID) ? 'eh-is-hidden' : 'eh-not-hidden'}`;
-    insertButton(30, 'Hide seller\'s items from search results.', classList, userIdHideButtonDiv);
-    $(userIdHideButtonDiv).on('click', '.hide-seller-button', function () {
+    insertButton(30, 'Hide seller\'s items from search results.', classList, userIdHideButtonUl);
+    $(userIdHideButtonUl).on('click', '.hide-seller-button', function () {
         $(this).toggleClass('eh-is-hidden eh-not-hidden');
         updateSellerHiddenStatus(sellerUserID);
     });

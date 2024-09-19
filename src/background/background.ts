@@ -1,47 +1,38 @@
 /********************************************************
  *                   Browser Storage                    *
  *******************************************************/
-let backgroundStorageObject = {
+
+let easyBlockStorageObject = {
     ebay: {
         sellers: [],
         items: [],
         hideSponsored: false,
         hideSellersFewerThanReviews: 0,
-        hideSellersLowerThanRating: 0,
+        hideSellersLowerThanReviews: 0,
         base_url: '',
     }
-}
+};
+
+
 
 /**
- * Saves the current list of hidden sellers and items to local storage.
+ * Saves the storage object to local storage.
  */
 function updateStorageListBackground() {
     chrome.storage.local.set({
-        'easyBlockStorageObject': backgroundStorageObject
+        easyBlockStorageObject: easyBlockStorageObject
     }, function () {
-        backgroundStorageObject.ebay.base_url = window.location.origin;
-        console.log('background storage object:', JSON.stringify(backgroundStorageObject));
+        console.log('background.js updated easyBlockStorageObject:', JSON.stringify(easyBlockStorageObject));
     });
 }
 
 /**
- * Initializes backgroundStorageObject from data, if it exists.
- * If the object is changed in storage from another script, update backgroundStorageObject
+ * Listens for changes to the storage object, and updates it if a change is detected.
  */
-chrome.storage.local.get(
-    'easyBlockStorageObject',
-    (data: typeof backgroundStorageObject) => {
-    console.warn('data3', JSON.stringify(data))
-    if (JSON.stringify(data) == '{}') {
-        return;
-    }
-    backgroundStorageObject = data;
-});
-
 chrome.storage.onChanged.addListener(function (changes, namespace) {
     for (var key in changes) {
         if (key === 'easyBlockStorageObject') {
-            backgroundStorageObject = changes[key].newValue;
+            easyBlockStorageObject = changes[key].newValue;
         }
     }
 });
@@ -85,7 +76,7 @@ if (navigator.userAgent.search("Chrome") > 0) {
             let enableOnSelectHostsRule = {
                 conditions: [
                     new chrome.declarativeContent.PageStateMatcher({
-                        pageUrl: { urlMatches: '^https:\/\/(www|.+?|www\..+?)\.ebay\.' },
+                        pageUrl: { urlMatches: '^https:\/\/(.+?\.)?ebay\.' },
                     })
                 ],
                 actions: [new chrome.declarativeContent.ShowAction()],
@@ -96,15 +87,18 @@ if (navigator.userAgent.search("Chrome") > 0) {
             chrome.declarativeContent.onPageChanged.addRules(rules);
         });
     });
+
+    easyBlockStorageObject.ebay.base_url = window.location.origin;
+    updateStorageListBackground();
 }
 //Check if browser is Firefox 
 else if (navigator.userAgent.search("Firefox") > 0) {
     function updateVisibility(url, tabId) {
-        if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..*/.test(url)) {
+        if (/'^https:\/\/(.+?\.)?ebay\.'/.test(url)) {
             chrome.pageAction.show(tabId, function () {
-                if (backgroundStorageObject.ebay.base_url === '') {
+                if (easyBlockStorageObject.ebay.base_url === '') {
                     let ebayURL = new URL(url.toString()).origin;
-                    backgroundStorageObject.ebay.base_url = ebayURL;
+                    easyBlockStorageObject.ebay.base_url = ebayURL;
                     updateStorageListBackground();
                 }
             });

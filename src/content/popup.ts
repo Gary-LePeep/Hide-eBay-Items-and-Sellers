@@ -1,62 +1,110 @@
 $(function () {
-    let backgroundStorageObject = {
+    /********************************************************
+     *                   Browser Storage                    *
+     *******************************************************/
+
+    let easyBlockStorageObject = {
         ebay: {
             sellers: [],
             items: [],
             hideSponsored: false,
             hideSellersFewerThanReviews: 0,
-            hideSellersLowerThanRating: 0,
+            hideSellersLowerThanReviews: 0,
             base_url: '',
         }
-    }
+    };
 
-    chrome.storage.local.get(
-        'easyBlockStorageObject',
-        (data: typeof backgroundStorageObject) => {
-        console.warn('data1', data.toString())
-        if (JSON.stringify(data) == '{}') {
-            return;
+    /**
+     * Retrieves the storage object from local storage.
+     */
+    chrome.storage.local.get({
+        easyBlockStorageObject: easyBlockStorageObject
+    }, function (data) {
+        easyBlockStorageObject = data.easyBlockStorageObject;
+        // Populate header website
+        console.warn(JSON.stringify(easyBlockStorageObject));
+        if (easyBlockStorageObject.ebay.base_url !== '') {
+            $('#forWebsite').text(`for ${easyBlockStorageObject.ebay.base_url}`);
         }
-        backgroundStorageObject = data;
-        if (backgroundStorageObject.ebay.sellers.length > 0) {
-            console.warn("there are sellers")
+        $('#forWebsite').text(`for ${easyBlockStorageObject.ebay.base_url}`);
+
+        // If there are sellers in the ebay object, remove the default list item and add each seller in the list.
+        if (easyBlockStorageObject.ebay.sellers.length > 0) {
             $('.seller-list-group .default-list-item').remove();
-            $.each(backgroundStorageObject.ebay.sellers, function (index, value) {
+            $.each(easyBlockStorageObject.ebay.sellers, function (index, value) {
                 addListItem('.seller-list-group', value);
             });
         }
 
-        if (backgroundStorageObject.ebay.items.length > 0) {
-            console.warn("there are items")
+        // If there are items in the ebay object, remove the default list item and add each item in the list.
+        if (easyBlockStorageObject.ebay.items.length > 0) {
             $('.item-list-group .default-list-item').remove();
-            $.each(backgroundStorageObject.ebay.items, function (index, value) {
+            $.each(easyBlockStorageObject.ebay.items, function (index, value) {
                 addListItem('.item-list-group', value);
             });
         }
-        console.log('backgroundStorageObject: ' + JSON.stringify(backgroundStorageObject));
+
+        // Update settings
+        if (easyBlockStorageObject.ebay.hideSponsored) {
+            $('input[id="hideSponsoredCheck"]').prop('checked', true);
+        }
+
+        if (easyBlockStorageObject.ebay.hideSellersFewerThanReviews > 0) {
+            $('input[id="hideFewerThanReviews"]').val(easyBlockStorageObject.ebay.hideSellersFewerThanReviews);
+        }
+
+        if (easyBlockStorageObject.ebay.hideSellersLowerThanReviews > 0) {
+            $('input[id="hideLowerThanReviews"]').val(easyBlockStorageObject.ebay.hideSellersLowerThanReviews);
+        }
     });
 
     /**
-     * Saves the current list of hidden sellers and items to local storage.
+     * Saves the storage object to local storage.
      */
     function updateStorageList() {
         chrome.storage.local.set({
-            'easyBlockStorageObject': backgroundStorageObject
+            easyBlockStorageObject: easyBlockStorageObject
         }, function () {
-            console.log('popup.js updated backgroundStorageObject:', JSON.stringify(backgroundStorageObject));
+            console.log('popup.js updated easyBlockStorageObject:', JSON.stringify(easyBlockStorageObject));
         });
     }
 
+    /********************************************************
+     *                      Settings                        *
+     *******************************************************/
+
+    $('input[id="hideSponsoredCheck"]').on('change', function () {
+        easyBlockStorageObject.ebay.hideSponsored = $(this).is(':checked');
+        updateStorageList();
+    })
+
+    $('input[id="submitHideFewerThanReviews"]').on('click', function () {
+        easyBlockStorageObject.ebay.hideSellersFewerThanReviews = parseInt($('input[id="hideFewerThanReviews"]').val().toString());
+        updateStorageList();
+    })
+
+    $('input[id="submitHideLowerThanReviews"]').on('click', function () {
+        easyBlockStorageObject.ebay.hideSellersLowerThanReviews = parseInt($('input[id="hideLowerThanReviews"]').val().toString());
+        updateStorageList();
+    })
+
+    /********************************************************
+     *             Seller & Item List Functions             *
+     *******************************************************/
+
+    /**
+     * When the user clicks on the remove button, the item is removed from the list and the storage object is updated.
+     */
     $('.list-group').on('click', '.remove-button', function () {
         let listGroup = $(this).closest('ul');
         let listItem = $(this).parent().get(0);
         let removedValue = $(listItem).find('a').first().text();
         if ($(listGroup).hasClass('seller-list-group')) {
-            backgroundStorageObject.ebay.sellers = $.grep(backgroundStorageObject.ebay.sellers, function (value) {
+            easyBlockStorageObject.ebay.sellers = $.grep(easyBlockStorageObject.ebay.sellers, function (value) {
                 return value != removedValue;
             });
         } else {
-            backgroundStorageObject.ebay.items = $.grep(backgroundStorageObject.ebay.items, function (value) {
+            easyBlockStorageObject.ebay.items = $.grep(easyBlockStorageObject.ebay.items, function (value) {
                 return value != removedValue;
             });
         }
@@ -86,7 +134,7 @@ $(function () {
             $('input', inputGroup).addClass('is-invalid');
             $(feedbackDiv).addClass('d-block').text('Please provide a valid eBay seller user ID.');
             return false;
-        } else if (backgroundStorageObject.ebay.sellers.includes(userID)) {
+        } else if (easyBlockStorageObject.ebay.sellers.includes(userID)) {
             $('input', inputGroup).addClass('is-invalid');
             $(feedbackDiv).addClass('d-block').text('You have already added this seller to the list.');
             return false;
@@ -113,7 +161,7 @@ $(function () {
             $('input', inputGroup).addClass('is-invalid');
             $(feedbackDiv).addClass('d-block').text('Please provide a valid eBay item number.');
             return false;
-        } else if (backgroundStorageObject.ebay.items.includes(itemNumber)) {
+        } else if (easyBlockStorageObject.ebay.items.includes(itemNumber)) {
             $('input', inputGroup).addClass('is-invalid');
             $(feedbackDiv).addClass('d-block').text('You have already added this item to the list.');
             return false;
@@ -144,9 +192,9 @@ $(function () {
         let bottom = $('li:last-child', listGroup).offset().top;
         $('li:last-child', listGroup).scrollTop(bottom);
         if ($(listGroup).hasClass('seller-list-group')) {
-            backgroundStorageObject.ebay.sellers.push(value);
+            easyBlockStorageObject.ebay.sellers.push(value);
         } else {
-            backgroundStorageObject.ebay.items.push(value);
+            easyBlockStorageObject.ebay.items.push(value);
         }
         updateStorageList();
     }
@@ -176,7 +224,7 @@ $(function () {
      * @param {string} value The text of the new item.
      */
     function addListItem(selector, value) {
-        let href = (backgroundStorageObject.ebay.base_url === '') ? 'https://ebay.com' : backgroundStorageObject.ebay.base_url;
+        let href = (easyBlockStorageObject.ebay.base_url === '') ? 'https://ebay.com' : easyBlockStorageObject.ebay.base_url;
         if ($(selector).hasClass('seller-list-group')) {
             href += '/usr/' + value;
         } else {

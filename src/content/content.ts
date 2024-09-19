@@ -8,34 +8,35 @@ let contentStorageObject = {
         items: [],
         hideSponsored: false,
         hideSellersFewerThanReviews: 0,
-        hideSellersLowerThanRating: 0,
+        hideSellersLowerThanReviews: 0,
         base_url: '',
     }
-}
+};
 
-chrome.storage.local.get(
-    'easyBlockStorageObject',
-    (data: typeof backgroundStorageObject) => {
-    console.warn('data2', JSON.stringify(data))
-    if (JSON.stringify(data) == '{}') {
-        return;
-    }
-    contentStorageObject = data;
+/**
+ * Retrieves the storage object from local storage.
+ */
+chrome.storage.local.get({
+    easyBlockStorageObject: contentStorageObject
+}, function (data) {
+    contentStorageObject = data.easyBlockStorageObject;
     processWebpage();
 });
 
 /**
- * Saves the current list of hidden sellers and items to local storage.
+ * Saves the storage object to local storage.
  */
 function updateStorageList() {
     chrome.storage.local.set({
-        'easyBlockStorageObject': contentStorageObject
+        easyBlockStorageObject: contentStorageObject
     }, function () {
-        contentStorageObject.ebay.base_url = window.location.origin;
-        console.log('content storage object:', JSON.stringify(contentStorageObject));
+        console.log('content.js updated easyBlockStorageObject:', JSON.stringify(easyBlockStorageObject));
     });
 }
 
+/**
+ * Listens for changes to the storage object, and updates it if a change is detected.
+ */
 chrome.storage.onChanged.addListener(function (changes, namespace) {
     for (var key in changes) {
         if (key === 'easyBlockStorageObject') {
@@ -59,11 +60,11 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
  * Depending on which type of page it is, process that type of webpage.
  */
 function processWebpage() {
-    if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..+?\/(sch|b)\/.+/.test(window.location.href)) {
+    if (/^https:\/\/(.+?\.)?ebay\..+?\/(sch|b)\/.+/.test(window.location.href)) {
         processSearchPage();
-    } else if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..+?\/(itm|p)\/.+/.test(window.location.href)) {
+    } else if (/^^https:\/\/(.+?\.)?ebay\..+?\/(itm|p)\/.+/.test(window.location.href)) {
         processItemPage();
-    } else if (/^https:\/\/(www|.+?|www\..+?)\.ebay\..+?\/usr\/.+/.test(window.location.href)) {
+    } else if (/^^https:\/\/(.+?\.)?ebay\..+?\/usr\/.+/.test(window.location.href)) {
         processUserPage();
     }
 }
@@ -124,6 +125,13 @@ function processSearchPage() {
             $(this).closest('li').remove();
         }
     });
+
+    // Hide sponsored items if option is enabled
+    if (contentStorageObject.ebay.hideSponsored) {
+        $('div .s-item__detail s-item__detail--primary', currentList).each(function () {
+            console.warn("sponsored: ", $(this));
+        })
+    }
 
     // Insert hide-item-button onto each item in search results
     let classList = 'hide-item-button eh-not-hidden';
@@ -199,13 +207,13 @@ function processItemPage() {
     let sellerUserID = sellerInfoDivs[0].innerText.split('\n')[0].toLowerCase()
 
     // Add hide seller button. Modify the div to make the button look good next to the name
-    let userIdHideButtonUl = document.createElement('ul')
-    sellerInfoDivs[0].appendChild(userIdHideButtonUl)
-    userIdHideButtonUl.style.cssText = `position: relative; left: 25px; top: -2px`
+    let userIdHideButtonDiv = document.createElement('div')
+    sellerInfoDivs[0].appendChild(userIdHideButtonDiv)
+    userIdHideButtonDiv.style.cssText = `position: relative; left: 25px; top: -2px`
 
     let classList = `hide-seller-button ${contentStorageObject.ebay.sellers.includes(sellerUserID) ? 'eh-is-hidden' : 'eh-not-hidden'}`;
-    insertButton(22, 'Hide seller\'s items from search results.', classList, userIdHideButtonUl);
-    $(userIdHideButtonUl).on('click', '.hide-seller-button', function () {
+    insertButton(22, 'Hide seller\'s items from search results.', classList, userIdHideButtonDiv);
+    $(userIdHideButtonDiv).on('click', '.hide-seller-button', function () {
         $(this).toggleClass('eh-is-hidden eh-not-hidden');
         updateSellerHiddenStatus(sellerUserID);
     });
@@ -229,13 +237,13 @@ function processUserPage() {
     let sellerUserID = sellerInfoDivs[0].getElementsByTagName("h1")[0].getElementsByTagName("a")[0].innerText.toLowerCase();
 
     // Add hide seller button. Modify the div to make the button look good next to the name
-    let userIdHideButtonUl = document.createElement('ul')
-    sellerInfoDivs[0].appendChild(userIdHideButtonUl)
-    userIdHideButtonUl.style.cssText = `position: relative; left: 35px; top: 2px`
+    let userIdHideButtonDiv = document.createElement('div')
+    sellerInfoDivs[0].getElementsByTagName("h1")[0].appendChild(userIdHideButtonDiv)
+    userIdHideButtonDiv.style.cssText = `position: relative; left: 35px; top: 2px`
 
     let classList = `hide-seller-button ${contentStorageObject.ebay.sellers.includes(sellerUserID) ? 'eh-is-hidden' : 'eh-not-hidden'}`;
-    insertButton(30, 'Hide seller\'s items from search results.', classList, userIdHideButtonUl);
-    $(userIdHideButtonUl).on('click', '.hide-seller-button', function () {
+    insertButton(30, 'Hide seller\'s items from search results.', classList, userIdHideButtonDiv);
+    $(userIdHideButtonDiv).on('click', '.hide-seller-button', function () {
         $(this).toggleClass('eh-is-hidden eh-not-hidden');
         updateSellerHiddenStatus(sellerUserID);
     });

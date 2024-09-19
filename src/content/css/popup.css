@@ -18,6 +18,20 @@ p {
     margin: 15px 0;
 }
 
+.header {
+    font-family: 'Nunito', sans-serif;
+    color: #F1F1F1;
+    background-color:#DC3646;
+}
+
+.header h3 {
+    margin: 0;
+}
+
+.header h5 {
+    margin: 0;
+}
+
 .nav-tabs .nav-link {
     border: none !important;
     border-radius: 0 !important;

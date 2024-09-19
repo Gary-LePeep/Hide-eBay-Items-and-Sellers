@@ -79,3 +79,31 @@ p {
 .default-list-item {
     color: #636363;
 }
+
+/* Left side of the row (label + input) */
+.left {
+    display: flex;
+    align-items: baseline;
+}
+
+.left label {
+    margin-right: 5px;
+}
+
+/* Right side (OK button) */
+.right {
+    margin-left: auto;
+}
+
+/* Ensure the row doesn't wrap and forces content to stay on the same line */
+.row {
+    white-space: nowrap;
+    margin-bottom: 10px;
+}
+
+/* Textbox size */
+input[type="text"] {
+    width: 40px;
+    padding: 3px;
+    margin-right: 5px;
+}

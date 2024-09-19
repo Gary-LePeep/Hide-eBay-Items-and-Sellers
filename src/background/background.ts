@@ -17,10 +17,10 @@ let backgroundStorageObject = {
  */
 function updateStorageListBackground() {
     chrome.storage.local.set({
-        backgroundStorageObject: backgroundStorageObject
+        'easyBlockStorageObject': backgroundStorageObject
     }, function () {
-        console.warn('base url:', window.location.origin);
-        console.log('background.js updated storage object:', JSON.stringify(backgroundStorageObject));
+        backgroundStorageObject.ebay.base_url = window.location.origin;
+        console.log('background storage object:', JSON.stringify(backgroundStorageObject));
     });
 }
 
@@ -28,15 +28,19 @@ function updateStorageListBackground() {
  * Initializes backgroundStorageObject from data, if it exists.
  * If the object is changed in storage from another script, update backgroundStorageObject
  */
-chrome.storage.local.get({
-    backgroundStorageObject: backgroundStorageObject
-}, function (data) {
-    backgroundStorageObject = data.backgroundStorageObject;
+chrome.storage.local.get(
+    'easyBlockStorageObject',
+    (data: typeof backgroundStorageObject) => {
+    console.warn('data3', JSON.stringify(data))
+    if (JSON.stringify(data) == '{}') {
+        return;
+    }
+    backgroundStorageObject = data;
 });
 
 chrome.storage.onChanged.addListener(function (changes, namespace) {
     for (var key in changes) {
-        if (key === 'easyBlocktorageObject') {
+        if (key === 'easyBlockStorageObject') {
             backgroundStorageObject = changes[key].newValue;
         }
     }

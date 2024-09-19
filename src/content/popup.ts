@@ -10,11 +10,16 @@ $(function () {
         }
     }
 
-    chrome.storage.local.get({
-        backgroundStorageObject: backgroundStorageObject
-    }, function (data) {
-        backgroundStorageObject = data.backgroundStorageObject;
+    chrome.storage.local.get(
+        'easyBlockStorageObject',
+        (data: typeof backgroundStorageObject) => {
+        console.warn('data1', data.toString())
+        if (JSON.stringify(data) == '{}') {
+            return;
+        }
+        backgroundStorageObject = data;
         if (backgroundStorageObject.ebay.sellers.length > 0) {
+            console.warn("there are sellers")
             $('.seller-list-group .default-list-item').remove();
             $.each(backgroundStorageObject.ebay.sellers, function (index, value) {
                 addListItem('.seller-list-group', value);
@@ -22,6 +27,7 @@ $(function () {
         }
 
         if (backgroundStorageObject.ebay.items.length > 0) {
+            console.warn("there are items")
             $('.item-list-group .default-list-item').remove();
             $.each(backgroundStorageObject.ebay.items, function (index, value) {
                 addListItem('.item-list-group', value);
@@ -30,16 +36,12 @@ $(function () {
         console.log('backgroundStorageObject: ' + JSON.stringify(backgroundStorageObject));
     });
 
-    window.addEventListener('load', () => {
-        window.focus();
-    });
-
     /**
      * Saves the current list of hidden sellers and items to local storage.
      */
     function updateStorageList() {
         chrome.storage.local.set({
-            backgroundStorageObject: backgroundStorageObject
+            'easyBlockStorageObject': backgroundStorageObject
         }, function () {
             console.log('popup.js updated backgroundStorageObject:', JSON.stringify(backgroundStorageObject));
         });

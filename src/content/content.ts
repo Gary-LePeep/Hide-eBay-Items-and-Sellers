@@ -2,16 +2,25 @@
  *                   Browser Storage                    *
  *******************************************************/
 
-let contentList = {
-    sellers: [],
-    items: [],
-    websiteURL: ''
-};
+let contentStorageObject = {
+    ebay: {
+        sellers: [],
+        items: [],
+        hideSponsored: false,
+        hideSellersFewerThanReviews: 0,
+        hideSellersLowerThanRating: 0,
+        base_url: '',
+    }
+}
 
-chrome.storage.local.get({
-    list: contentList
-}, function (data) {
-    contentList = data.list;
+chrome.storage.local.get(
+    'easyBlockStorageObject',
+    (data: typeof backgroundStorageObject) => {
+    console.warn('data2', JSON.stringify(data))
+    if (JSON.stringify(data) == '{}') {
+        return;
+    }
+    contentStorageObject = data;
     processWebpage();
 });
 
@@ -20,17 +29,17 @@ chrome.storage.local.get({
  */
 function updateStorageList() {
     chrome.storage.local.set({
-        list: contentList
+        'easyBlockStorageObject': contentStorageObject
     }, function () {
-        console.log('src/background/background.js updated list:');
-        console.log('websiteURL: ' + contentList.websiteURL);
+        contentStorageObject.ebay.base_url = window.location.origin;
+        console.log('content storage object:', JSON.stringify(contentStorageObject));
     });
 }
 
 chrome.storage.onChanged.addListener(function (changes, namespace) {
     for (var key in changes) {
-        if (key === 'list') {
-            contentList = changes[key].newValue;
+        if (key === 'easyBlockStorageObject') {
+            contentStorageObject = changes[key].newValue;
         }
     }
 });
@@ -94,14 +103,14 @@ function processSearchPage() {
     if (divSelecter === 'li.sresult') {
         $('li.sresult', currentList).each(function () {
             let itemNumber: string = $(this).attr('listingid') || '';
-            if (itemNumber !== '' && contentList.items.includes(itemNumber)) {
+            if (itemNumber !== '' && contentStorageObject.ebay.items.includes(itemNumber)) {
                 $(this).closest('li').remove();
             }
         });
     } else {
         $('li .s-item__info .s-item__link', currentList).each(function () {
             let itemNumber: string = getItemNumber($(this).attr('href'));
-            if (itemNumber !== '' && contentList.items.includes(itemNumber)) {
+            if (itemNumber !== '' && contentStorageObject.ebay.items.includes(itemNumber)) {
                 $(this).closest('li').remove();
             }
         });
@@ -111,7 +120,7 @@ function processSearchPage() {
     $('li .s-item__info .s-item__seller-info-text', currentList).each(function () {
         let sellerInfoString: string = $(this).text();
         let sellerInfo = processSellerInfo(sellerInfoString);
-        if (sellerInfo.sellerName !== '' && contentList.sellers.includes(sellerInfo.sellerName)) {
+        if (sellerInfo.sellerName !== '' && contentStorageObject.ebay.sellers.includes(sellerInfo.sellerName)) {
             $(this).closest('li').remove();
         }
     });
@@ -163,8 +172,8 @@ function hideItem() {
     }
     // Add item to list of hidden items
     if (itemNumber !== '') {
-        if (!contentList.items.includes(itemNumber)) {
-            contentList.items.push(itemNumber);
+        if (!contentStorageObject.ebay.items.includes(itemNumber)) {
+            contentStorageObject.ebay.items.push(itemNumber);
         }
         updateStorageList();
     }
@@ -194,7 +203,7 @@ function processItemPage() {
     sellerInfoDivs[0].appendChild(userIdHideButtonUl)
     userIdHideButtonUl.style.cssText = `position: relative; left: 25px; top: -2px`
 
-    let classList = `hide-seller-button ${contentList.sellers.includes(sellerUserID) ? 'eh-is-hidden' : 'eh-not-hidden'}`;
+    let classList = `hide-seller-button ${contentStorageObject.ebay.sellers.includes(sellerUserID) ? 'eh-is-hidden' : 'eh-not-hidden'}`;
     insertButton(22, 'Hide seller\'s items from search results.', classList, userIdHideButtonUl);
     $(userIdHideButtonUl).on('click', '.hide-seller-button', function () {
         $(this).toggleClass('eh-is-hidden eh-not-hidden');
@@ -224,7 +233,7 @@ function processUserPage() {
     sellerInfoDivs[0].appendChild(userIdHideButtonUl)
     userIdHideButtonUl.style.cssText = `position: relative; left: 35px; top: 2px`
 
-    let classList = `hide-seller-button ${contentList.sellers.includes(sellerUserID) ? 'eh-is-hidden' : 'eh-not-hidden'}`;
+    let classList = `hide-seller-button ${contentStorageObject.ebay.sellers.includes(sellerUserID) ? 'eh-is-hidden' : 'eh-not-hidden'}`;
     insertButton(30, 'Hide seller\'s items from search results.', classList, userIdHideButtonUl);
     $(userIdHideButtonUl).on('click', '.hide-seller-button', function () {
         $(this).toggleClass('eh-is-hidden eh-not-hidden');
@@ -243,12 +252,12 @@ function processUserPage() {
 function updateSellerHiddenStatus(sellerUserID) {
     console.log('updating seller status');
     console.log(sellerUserID);
-    if (contentList.sellers.includes(sellerUserID)) {
-        contentList.sellers = $.grep(contentList.sellers, function (value) {
+    if (contentStorageObject.ebay.sellers.includes(sellerUserID)) {
+        contentStorageObject.ebay.sellers = $.grep(contentStorageObject.ebay.sellers, function (value) {
             return value != sellerUserID;
         });
     } else {
-        contentList.sellers.push(sellerUserID);
+        contentStorageObject.ebay.sellers.push(sellerUserID);
     }
     updateStorageList();
 }

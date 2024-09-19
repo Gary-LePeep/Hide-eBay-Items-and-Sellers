@@ -60,12 +60,15 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
  * Depending on which type of page it is, process that type of webpage.
  */
 function processWebpage() {
-    if (/^https:\/\/(.+?\.)?ebay\..+?\/(sch|b)\/.+/.test(window.location.href)) {
-        processSearchPage();
-    } else if (/^^https:\/\/(.+?\.)?ebay\..+?\/(itm|p)\/.+/.test(window.location.href)) {
-        processItemPage();
-    } else if (/^^https:\/\/(.+?\.)?ebay\..+?\/usr\/.+/.test(window.location.href)) {
-        processUserPage();
+    if (/^https:\/\/(.+?\.)?ebay\./.test(window.location.origin)) {
+        contentStorageObject.ebay.base_url = window.location.origin.replace('https://', '');
+        if (/^https:\/\/(.+?\.)?ebay\..+?\/(sch|b)\/.+/.test(window.location.href)) {
+            processSearchPage();
+        } else if (/^^https:\/\/(.+?\.)?ebay\..+?\/(itm|p)\/.+/.test(window.location.href)) {
+            processItemPage();
+        } else if (/^^https:\/\/(.+?\.)?ebay\..+?\/usr\/.+/.test(window.location.href)) {
+            processUserPage();
+        }
     }
 }
 

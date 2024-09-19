@@ -1,7 +1,6 @@
 /********************************************************
  *                   Browser Storage                    *
  *******************************************************/
-
 let easyBlockStorageObject = {
     ebay: {
         sellers: [],
@@ -12,7 +11,6 @@ let easyBlockStorageObject = {
         base_url: '',
     }
 };
-
 
 
 /**
@@ -36,7 +34,6 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
         }
     }
 });
-
 
 /********************************************************
  *                  Page Action Popup                   *
@@ -87,14 +84,11 @@ if (navigator.userAgent.search("Chrome") > 0) {
             chrome.declarativeContent.onPageChanged.addRules(rules);
         });
     });
-
-    easyBlockStorageObject.ebay.base_url = window.location.origin;
-    updateStorageListBackground();
 }
 //Check if browser is Firefox 
 else if (navigator.userAgent.search("Firefox") > 0) {
     function updateVisibility(url, tabId) {
-        if (/'^https:\/\/(.+?\.)?ebay\.'/.test(url)) {
+        if (/^https:\/\/(.+?\.)?ebay\./.test(url)) {
             chrome.pageAction.show(tabId, function () {
                 if (easyBlockStorageObject.ebay.base_url === '') {
                     let ebayURL = new URL(url.toString()).origin;

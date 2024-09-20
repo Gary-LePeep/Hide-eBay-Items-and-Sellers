@@ -56,17 +56,17 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
  * Ebay:
  *   `sch` or `b`: This is a search or category page.
  *   `itm` or `p`: This is a page for an item or category-item.
- *   `usr`: This is the page of a user.
+ *   `usr` or `str`: This is the page of a user.
  * Depending on which type of page it is, process that type of webpage.
  */
 function processWebpage() {
     if (/^https:\/\/(.+?\.)?ebay\./.test(window.location.origin)) {
-        contentStorageObject.ebay.base_url = `ebay${window.location.origin.split('ebay')[1]}`;
+        contentStorageObject.ebay.base_url = window.location.origin;
         if (/^https:\/\/(.+?\.)?ebay\..+?\/(sch|b)\/.+/.test(window.location.href)) {
             processSearchPage();
         } else if (/^^https:\/\/(.+?\.)?ebay\..+?\/(itm|p)\/.+/.test(window.location.href)) {
             processItemPage();
-        } else if (/^^https:\/\/(.+?\.)?ebay\..+?\/usr\/.+/.test(window.location.href)) {
+        } else if (/^^https:\/\/(.+?\.)?ebay\..+?\/(usr|str)\/.+/.test(window.location.href)) {
             processUserPage();
         }
     }
@@ -81,6 +81,17 @@ function processWebpage() {
  * Finally, the hide-item-button is added onto every remaining item in the search result list.
  */
 function processSearchPage() {
+    if (navigator.userAgent.search("Chrome") > 0) {
+        // Get the current URL and update parameters if there are sellers to exclude.
+        // Firefox does this in background
+        let currentUrl = window.location.href;
+        let updatedUrl = contentUpdateParameters(currentUrl);
+
+        if (currentUrl !== updatedUrl) {
+            window.location.replace(updatedUrl);
+        }
+    }
+
     // Get the list of search results from the page elements
     let ulLists = ['ul.srp-results', 'ul#ListViewInner', 'ul.b-list__items_nofooter'];
     let currentList = null;
@@ -120,15 +131,6 @@ function processSearchPage() {
         });
     }
 
-    // Hide any sellers that have already been previously hidden.
-    $('li .s-item__info .s-item__seller-info-text', currentList).each(function () {
-        let sellerInfoString: string = $(this).text();
-        let sellerInfo = processSellerInfo(sellerInfoString);
-        if (sellerInfo.sellerName !== '' && contentStorageObject.ebay.sellers.includes(sellerInfo.sellerName)) {
-            $(this).closest('li').remove();
-        }
-    });
-
     // Hide sponsored items if option is enabled
     if (contentStorageObject.ebay.hideSponsored) {
         $('div .s-item__detail s-item__detail--primary', currentList).each(function () {
@@ -140,6 +142,29 @@ function processSearchPage() {
     let classList = 'hide-item-button eh-not-hidden';
     insertButton(30, 'Hide item from search results.', classList, $(divSelecter, currentList));
     $($(divSelecter, currentList)).on('click', '.hide-item-button', hideItem);
+}
+
+function contentUpdateParameters(u) {
+    let url = new URL(u);
+    let sellers_string = contentStorageObject.ebay.sellers.toString();
+    //console.log('sellers_string: ' + sellers_string);
+    url.searchParams.delete('_sasl');
+    if (sellers_string === '') {
+        url.searchParams.delete('LH_SpecificSeller');
+        url.searchParams.delete('_saslop');
+    } else {
+        let parameters = ['LH_SpecificSeller', '_saslop'];
+        let values = [1, 2];
+        parameters.forEach(function(p, i) {
+            if (url.searchParams.has(p)) {
+                url.searchParams.set(p, values[i].toString());
+            } else {
+                url.searchParams.append(p, values[i].toString());
+            }
+        });
+        url.searchParams.append('_sasl', contentStorageObject.ebay.sellers.toString());
+    }
+    return url.toString();
 }
 
 function processSellerInfo(sellerInfo: string) {
@@ -202,23 +227,27 @@ function hideItem() {
  */
 function processItemPage() {
     // Extract seller user Id from elements
-    let sellerInfoDivs: HTMLCollectionOf<HTMLDivElement> = document.getElementsByClassName('x-sellercard-atf__info__about-seller') as HTMLCollectionOf<HTMLDivElement>
-    if (sellerInfoDivs.length != 1) {
-        console.warn(`Expected 1 seller on this item page, but actually found ${sellerInfoDivs.length}:`, sellerInfoDivs)
-        return;
+    let sellerHref = $('.x-sellercard-atf__info__about-seller a').first()[0].getAttribute('href');
+    let sellerUserId;
+    if (sellerHref.includes('/str/')){
+        sellerUserId = sellerHref.split('/str/')[1];
+    } else if (sellerHref.includes('/sch/')){
+        sellerUserId = sellerHref.split('/sch/')[1];
+    } else if (sellerHref.includes('/usr/')){
+        sellerUserId = sellerHref.split('/usr/')[1];
     }
-    let sellerUserID = sellerInfoDivs[0].innerText.split('\n')[0].toLowerCase()
+    sellerUserId = sellerUserId.split('?')[0].split('/')[0];
 
     // Add hide seller button. Modify the div to make the button look good next to the name
     let userIdHideButtonDiv = document.createElement('div')
-    sellerInfoDivs[0].appendChild(userIdHideButtonDiv)
+    $('.x-sellercard-atf__info__about-seller a').parent('div').first()[0].appendChild(userIdHideButtonDiv)
     userIdHideButtonDiv.style.cssText = `position: relative; left: 25px; top: -2px`
 
-    let classList = `hide-seller-button ${contentStorageObject.ebay.sellers.includes(sellerUserID) ? 'eh-is-hidden' : 'eh-not-hidden'}`;
+    let classList = `hide-seller-button ${contentStorageObject.ebay.sellers.includes(sellerUserId) ? 'eh-is-hidden' : 'eh-not-hidden'}`;
     insertButton(22, 'Hide seller\'s items from search results.', classList, userIdHideButtonDiv);
     $(userIdHideButtonDiv).on('click', '.hide-seller-button', function () {
         $(this).toggleClass('eh-is-hidden eh-not-hidden');
-        updateSellerHiddenStatus(sellerUserID);
+        updateSellerHiddenStatus(sellerUserId);
     });
 }
 

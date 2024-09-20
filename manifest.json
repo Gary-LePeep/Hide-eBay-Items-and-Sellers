@@ -35,7 +35,7 @@
       "matches": ["*://*/*"]
     }
   ],
-  "permissions": ["storage", "unlimitedStorage", "tabs", "declarativeContent", "active_tab"],
+  "permissions": ["storage", "unlimitedStorage", "tabs", "declarativeContent", "active_tab", "webRequest", "webRequestBlocking"],
   "host_permissions": [
     "https://*.ebay.com/*",
     "https://*.ebay.com.au/*",

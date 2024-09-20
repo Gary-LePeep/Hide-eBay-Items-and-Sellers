@@ -24,9 +24,8 @@ $(function () {
         // Populate header website
         console.warn(JSON.stringify(easyBlockStorageObject));
         if (easyBlockStorageObject.ebay.base_url !== '') {
-            $('#forWebsite').text(`for ${easyBlockStorageObject.ebay.base_url}`);
+            $('#forWebsite').text(`for ${easyBlockStorageObject.ebay.base_url.replace('https://', '').replace('www.', '')}`);
         }
-        $('#forWebsite').text(`for ${easyBlockStorageObject.ebay.base_url}`);
 
         // If there are sellers in the ebay object, remove the default list item and add each seller in the list.
         if (easyBlockStorageObject.ebay.sellers.length > 0) {

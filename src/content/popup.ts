@@ -48,6 +48,7 @@ $(function () {
             $('input[id="hideSponsoredCheck"]').prop('checked', true);
         }
 
+        console.log('hideSellersFewerThanReviews', easyBlockStorageObject.ebay.hideSellersFewerThanReviews);
         if (easyBlockStorageObject.ebay.hideSellersFewerThanReviews > 0) {
             $('input[id="hideFewerThanReviews"]').val(easyBlockStorageObject.ebay.hideSellersFewerThanReviews);
         }
@@ -74,18 +75,30 @@ $(function () {
 
     $('input[id="hideSponsoredCheck"]').on('change', function () {
         easyBlockStorageObject.ebay.hideSponsored = $(this).is(':checked');
+        $('#refreshToApply').removeClass('d-none');
         updateStorageList();
     })
 
-    $('input[id="submitHideFewerThanReviews"]').on('click', function () {
-        easyBlockStorageObject.ebay.hideSellersFewerThanReviews = parseInt($('input[id="hideFewerThanReviews"]').val().toString());
+    $('#submitHideFewerThanReviews').on('click', function () {
+        easyBlockStorageObject.ebay.hideSellersFewerThanReviews = parseInt($('#hideFewerThanReviews').val().toString());
+        $('#refreshToApply').removeClass('d-none');
         updateStorageList();
     })
 
-    $('input[id="submitHideLowerThanReviews"]').on('click', function () {
-        easyBlockStorageObject.ebay.hideSellersLowerThanReviews = parseInt($('input[id="hideLowerThanReviews"]').val().toString());
+    $('#submitHideLowerThanReviews').on('click', function () {
+        easyBlockStorageObject.ebay.hideSellersLowerThanReviews = parseInt($('#hideLowerThanReviews').val().toString());
+        $('#refreshToApply').removeClass('d-none');
         updateStorageList();
     })
+
+    document.getElementById('refreshToApply').addEventListener('click', () => {
+        console.log('refreshing page');
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs[0].id) {
+                chrome.tabs.reload(tabs[0].id);
+            }
+        });
+    });
 
     /********************************************************
      *             Seller & Item List Functions             *
@@ -198,7 +211,7 @@ $(function () {
         updateStorageList();
     }
 
-    $('.hide-button').click(function (e) {
+    $('.hide-button').on('click', function (e) {
         let inputGroup = $(this).closest('.input-group');
         let input = $(inputGroup).children('input').first();
         if ($(input).hasClass('userid-input')) {

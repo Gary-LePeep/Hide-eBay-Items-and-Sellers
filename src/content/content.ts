@@ -45,6 +45,7 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
     }
 });
 
+
 /********************************************************
  *                   Process Webpage                    *
  *******************************************************/
@@ -81,17 +82,6 @@ function processWebpage() {
  * Finally, the hide-item-button is added onto every remaining item in the search result list.
  */
 function processSearchPage() {
-    if (navigator.userAgent.search("Chrome") > 0) {
-        // Get the current URL and update parameters if there are sellers to exclude.
-        // Firefox does this in background
-        let currentUrl = window.location.href;
-        let updatedUrl = contentUpdateParameters(currentUrl);
-
-        if (currentUrl !== updatedUrl) {
-            window.location.replace(updatedUrl);
-        }
-    }
-
     // Get the list of search results from the page elements
     let ulLists = ['ul.srp-results', 'ul#ListViewInner', 'ul.b-list__items_nofooter'];
     let currentList = null;
@@ -131,12 +121,20 @@ function processSearchPage() {
         });
     }
 
-    // Hide sponsored items if option is enabled
-    if (contentStorageObject.ebay.hideSponsored) {
-        $('div .s-item__detail s-item__detail--primary', currentList).each(function () {
-            console.warn("sponsored: ", $(this));
-        })
-    }
+    // Hide any sellers that have already been previously hidden or dont meet minimums.
+    $('li .s-item__info .s-item__seller-info-text', currentList).each(function () {
+        let sellerInfoString: string = $(this).text();
+        let sellerInfo = processSellerInfo(sellerInfoString);
+        if (sellerInfo.sellerName !== '' && contentStorageObject.ebay.sellers.includes(sellerInfo.sellerName)) {
+            $(this).closest('li').remove();
+        }
+        if (sellerInfo.sellerRating < contentStorageObject.ebay.hideSellersLowerThanReviews) {
+            $(this).closest('li').remove();
+        }
+        if (sellerInfo.sellerReviewCount < contentStorageObject.ebay.hideSellersFewerThanReviews) {
+            $(this).closest('li').remove();
+        }
+    });
 
     // Insert hide-item-button onto each item in search results
     let classList = 'hide-item-button eh-not-hidden';
@@ -144,33 +142,10 @@ function processSearchPage() {
     $($(divSelecter, currentList)).on('click', '.hide-item-button', hideItem);
 }
 
-function contentUpdateParameters(u) {
-    let url = new URL(u);
-    let sellers_string = contentStorageObject.ebay.sellers.toString();
-    //console.log('sellers_string: ' + sellers_string);
-    url.searchParams.delete('_sasl');
-    if (sellers_string === '') {
-        url.searchParams.delete('LH_SpecificSeller');
-        url.searchParams.delete('_saslop');
-    } else {
-        let parameters = ['LH_SpecificSeller', '_saslop'];
-        let values = [1, 2];
-        parameters.forEach(function(p, i) {
-            if (url.searchParams.has(p)) {
-                url.searchParams.set(p, values[i].toString());
-            } else {
-                url.searchParams.append(p, values[i].toString());
-            }
-        });
-        url.searchParams.append('_sasl', contentStorageObject.ebay.sellers.toString());
-    }
-    return url.toString();
-}
-
 function processSellerInfo(sellerInfo: string) {
     return {
         sellerName: sellerInfo.split(' ')[0].toLowerCase(),
-        sellerReviewCount: sellerInfo.split(' ')[1].replace(/[()]/g, ''),
+        sellerReviewCount: parseInt(sellerInfo.split(' ')[1].replace(/[()]/g, '')),
         sellerRating: parseFloat(sellerInfo.split(' ')[2])
     }
 }

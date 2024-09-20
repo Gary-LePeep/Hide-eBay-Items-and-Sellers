@@ -31,9 +31,9 @@
             <div class="tab-pane fade show active" id="nav-settings" role="tabpanel" aria-labelledby="nav-settings-tab">
                 <div class="container">
                     <br>
-                    <input type="checkbox" id="hideSponsoredCheck">
+                    <input type="checkbox" id="hideSponsoredCheck" disabled>
                     <label for="hideSponsoredCheck"> Hide Sponsored Items</label>
-                    <br>
+                    <label class="comingSoonNotice">ⓘ Coming Soon</label>
                     <br>
                     <label>Hide sellers with:</label>
                     <br>
@@ -44,7 +44,7 @@
                             <label for="hideFewerThanReviews">reviews</label>
                         </div>
                         <div class="right">
-                            <button class="btn btn-outline-danger hide-button" type="button" id="submitHideFewerThanReviews">
+                            <button class="btn btn-outline-danger" type="button" id="submitHideFewerThanReviews">
                                 <span>OK</span>
                             </button>
                         </div>
@@ -56,11 +56,15 @@
                             <label for="hideLowerThanReviews">%</label>
                         </div>
                         <div class="right">
-                            <button class="btn btn-outline-danger hide-button" type="button" id="submitHideLowerThanReviews">
+                            <button class="btn btn-outline-danger" type="button" id="submitHideLowerThanReviews">
                                 <span>OK</span>
                             </button>
                         </div>
                     </div>
+                    <br>
+                    <button class="btn btn-outline-danger d-none" type="button" id="refreshToApply">
+                        <span>Refresh To Apply</span>
+                    </button>
                 </div>
             </div>
 
@@ -110,7 +114,7 @@
 
     <script src="../resources/jquery-3.4.1.min.js"></script>
     <script src="../resources/bootstrap.min.js"></script>
-    <script src="./popup.js"></script>
+    <script src="./popup.js" defer></script>
 </body>
 
 </html>

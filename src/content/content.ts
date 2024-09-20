@@ -61,7 +61,7 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
  */
 function processWebpage() {
     if (/^https:\/\/(.+?\.)?ebay\./.test(window.location.origin)) {
-        contentStorageObject.ebay.base_url = window.location.origin.replace('https://', '');
+        contentStorageObject.ebay.base_url = `ebay${window.location.origin.split('ebay')[1]}`;
         if (/^https:\/\/(.+?\.)?ebay\..+?\/(sch|b)\/.+/.test(window.location.href)) {
             processSearchPage();
         } else if (/^^https:\/\/(.+?\.)?ebay\..+?\/(itm|p)\/.+/.test(window.location.href)) {

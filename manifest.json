@@ -9,11 +9,19 @@
     "16": "src/resources/icon16.png"
   },
   "page_action": {
-    "default_icon": "src/resources/icon16.png",
+    "default_icon": {
+      "16": "src/resources/icon16.png",
+      "48": "src/resources/icon48.png",
+      "128": "src/resources/icon128.png"
+    },
     "default_popup": "src/content/popup.html"
   },
   "action": {
-    "default_icon": "src/resources/icon16.png",
+    "default_icon": {
+      "16": "src/resources/icon16.png",
+      "48": "src/resources/icon48.png",
+      "128": "src/resources/icon128.png"
+    },
     "default_popup": "src/content/popup.html"
   },
   "content_scripts": [
@@ -26,16 +34,21 @@
     }
   ],
   "background": {
-    "scripts": ["src/background/background.js"],
-    "service_worker": "src/background/background.js"
+    "scripts": ["src/background.js"],
+    "service_worker": "src/background.js"
   },
   "web_accessible_resources": [
     {
-      "resources": ["src/resources/icon48.png"],
+      "resources": [
+        "src/resources/icon128.png",
+        "src/resources/icon16.png",
+        "src/resources/icon48.png",
+        "src/content/content-ebay.js"
+      ],
       "matches": ["*://*/*"]
     }
   ],
-  "permissions": ["storage", "unlimitedStorage", "tabs", "declarativeContent", "active_tab", "webRequest", "webRequestBlocking"],
+  "permissions": ["storage", "unlimitedStorage", "tabs", "declarativeContent", "active_tab", "webRequest", "webRequestBlocking", "scripting"],
   "host_permissions": [
     "https://*.ebay.com/*",
     "https://*.ebay.com.au/*",

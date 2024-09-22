@@ -1,7 +1,9 @@
 /********************************************************
  *                   Browser Storage                    *
  *******************************************************/
+
 let easyBlockStorageObject = {
+    webpage: "",
     ebay: {
         sellers: [],
         items: [],
@@ -49,17 +51,18 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
  * The function changes the extension button from managing the extension
  * to showing the item & seller popup as defined in popup.html.
  *
- * For Firefox, page_action works to create an extension button in the url bar on ebay pages.
- * Likewise, action enables the extension button in the extension toolbar on ebay pages.
- * For non-ebay pages, the extension button is hidden from the url bar and disabled in the extension toolbar.
+ * For Firefox, page_action works to create an extension button in the url bar on select pages.
+ * Likewise, action enables the extension button in the extension toolbar on select pages.
+ * For all other pages, the extension button is hidden from the url bar and disabled in the extension toolbar.
  *
  * This function is called when the user navigates to a new page.
- * If the page is an ebay page, it enables the page action.
- * If the page is not an ebay page, it hides the page action.
+ * If the page is a select page, it enables the page action.
+ * If the page is not a select page, it hides the page action.
  *
  * @param {string} newUrl The URL of the new page.
  * @param {int} tabId The id of the tab that was updated.
  */
+let select_page_regex = `(^https:\/\/(.+?\.)?ebay\.)`;
 
 //Check if browser is Chrome
 if (navigator.userAgent.search("Chrome") > 0) {
@@ -75,7 +78,7 @@ if (navigator.userAgent.search("Chrome") > 0) {
             let enableOnSelectHostsRule = {
                 conditions: [
                     new chrome.declarativeContent.PageStateMatcher({
-                        pageUrl: { urlMatches: "^https://(.+?.)?ebay." },
+                        pageUrl: { urlMatches: select_page_regex },
                     }),
                 ],
                 actions: [new chrome.declarativeContent.ShowAction()],
@@ -90,14 +93,8 @@ if (navigator.userAgent.search("Chrome") > 0) {
 //Check if browser is Firefox
 else if (navigator.userAgent.search("Firefox") > 0) {
     function updateVisibility(url, tabId) {
-        if (/^https:\/\/(.+?\.)?ebay\./.test(url)) {
-            chrome.pageAction.show(tabId, function () {
-                if (easyBlockStorageObject.ebay.base_url === "") {
-                    let ebayURL = new URL(url.toString()).origin;
-                    easyBlockStorageObject.ebay.base_url = ebayURL;
-                    updateStorageListBackground();
-                }
-            });
+        if (new RegExp(select_page_regex).test(url)) {
+            chrome.pageAction.show(tabId);
             chrome.action.enable();
         } else {
             chrome.pageAction.hide(tabId);

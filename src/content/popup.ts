@@ -4,6 +4,7 @@ $(function () {
      *******************************************************/
 
     let easyBlockStorageObject = {
+        webpage: "",
         ebay: {
             sellers: [],
             items: [],

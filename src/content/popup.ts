@@ -151,7 +151,7 @@ function initializeHideAndUnhideButtons() {
 function updateStorageList2() {
     chrome.storage.local.set(
         {
-            easyBlockStorageObject2: easyBlockStorageObject2,
+            easyBlockStorageObject: easyBlockStorageObject2,
         },
         function () {
             console.log("popup.js updated easyBlockStorageObject2:", JSON.stringify(easyBlockStorageObject2));

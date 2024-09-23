@@ -20,7 +20,7 @@ export function getEasyBlockStorageObject(): Promise<EasyBlockStorageObject> {
                 return reject(chrome.runtime.lastError);
             }
             // Provide a default structure if not found in storage
-            resolve(result.easyBlockStorageObject || {
+            const easyBlockStorageObject = result.easyBlockStorageObject || {
                 webpage: "",
                 ebay: {
                     sellers: [],
@@ -30,7 +30,9 @@ export function getEasyBlockStorageObject(): Promise<EasyBlockStorageObject> {
                     hideSellersLowerThanReviews: 0,
                     base_url: ""
                 }
-            });
+            };
+            console.log("easyBlockStorageObject retrieved:", JSON.stringify(easyBlockStorageObject));
+            resolve(easyBlockStorageObject);
         });
     });
 }
@@ -39,6 +41,7 @@ export function getEasyBlockStorageObject(): Promise<EasyBlockStorageObject> {
 export function setEasyBlockStorageObject(easyBlockStorageObject: EasyBlockStorageObject): Promise<void> {
     return new Promise((resolve, reject) => {
         chrome.storage.local.set({ easyBlockStorageObject }, () => {
+            console.log("easyBlockStorageObject saved:", JSON.stringify(easyBlockStorageObject));
             if (chrome.runtime.lastError) {
                 return reject(chrome.runtime.lastError);
             }

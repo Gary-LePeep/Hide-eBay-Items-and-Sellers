@@ -1,24 +1,19 @@
 import { getEasyBlockStorageObject, setEasyBlockStorageObject, EasyBlockStorageObject } from './storage.js';
 
+/**
+ * Initialize the popup.
+ * 
+ * This function retrieves the easyBlockStorageObject from the storage module and uses it to populate the popup.
+ */
 $(function () {
-    /********************************************************
-     *                   Browser Storage                    *
-     *******************************************************/
-
-    /**
-     * Retrieves the storage object from the shared storage module.
-     */
-    getEasyBlockStorageObject().then((easyBlockStorageObject2: EasyBlockStorageObject) => {
-        console.warn(JSON.stringify(easyBlockStorageObject2));
-
-        // Check if the current page is eBay
-        if (/^https:\/\/(.+?\.)?ebay\./.test(easyBlockStorageObject2.webpage)) {
+    getEasyBlockStorageObject().then((easyBlockStorageObject: EasyBlockStorageObject) => {
+        if (/^https:\/\/(.+?\.)?ebay\./.test(easyBlockStorageObject.webpage)) {
             // Dynamically import the eBay-specific module
             import(chrome.runtime.getURL('src/content/popup-ebay.js')).then(module => {
                 // Use the module's functions to populate the popup
-                module.populateWebsiteHeader(easyBlockStorageObject2.webpage);
-                module.populatePopup(easyBlockStorageObject2.ebay);
-                module.initializeHideAndUnhideButtons(easyBlockStorageObject2.ebay);
+                module.populateWebsiteHeader(easyBlockStorageObject.webpage);
+                module.populatePopup(easyBlockStorageObject.ebay);
+                module.initializeHideAndUnhideButtons(easyBlockStorageObject.ebay);
             }).catch(err => {
                 console.error('Failed to load eBay specific code', err);
             });

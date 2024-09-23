@@ -69,6 +69,7 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
  */
 function processWebpage() {
     contentStorageObject.webpage = window.location.origin;
+    updateStorageList();
     if (/^https:\/\/(.+?\.)?ebay\./.test(window.location.origin)) {
         contentStorageObject.ebay.base_url = window.location.origin;
         import(chrome.runtime.getURL('src/content/content-ebay.js')).then(module => {

@@ -1,278 +1,29 @@
-let easyBlockStorageObject2 = {
-    webpage: "",
-    ebay: {
-        sellers: [],
-        items: [],
-        hideSponsored: false,
-        hideSellersFewerThanReviews: 0,
-        hideSellersLowerThanReviews: 0,
-        base_url: "",
-    },
-};
+import { getEasyBlockStorageObject, setEasyBlockStorageObject, EasyBlockStorageObject } from './storage.js';
 
 $(function () {
     /********************************************************
      *                   Browser Storage                    *
      *******************************************************/
 
-    
-
     /**
-     * Retrieves the storage object from local storage.
+     * Retrieves the storage object from the shared storage module.
      */
-    chrome.storage.local.get(
-        {
-            easyBlockStorageObject: easyBlockStorageObject2,
-        },
-        function (data) {
-            easyBlockStorageObject2 = data.easyBlockStorageObject;
-            console.warn(JSON.stringify(easyBlockStorageObject2));
+    getEasyBlockStorageObject().then((easyBlockStorageObject2: EasyBlockStorageObject) => {
+        console.warn(JSON.stringify(easyBlockStorageObject2));
 
-            if (/^https:\/\/(.+?\.)?ebay\./.test(easyBlockStorageObject2.webpage)) {
-                populateWebsiteHeader(easyBlockStorageObject2.webpage);
-                populatePopup();
-                initializeHideAndUnhideButtons();
-            }
+        // Check if the current page is eBay
+        if (/^https:\/\/(.+?\.)?ebay\./.test(easyBlockStorageObject2.webpage)) {
+            // Dynamically import the eBay-specific module
+            import(chrome.runtime.getURL('src/content/popup-ebay.js')).then(module => {
+                // Use the module's functions to populate the popup
+                module.populateWebsiteHeader(easyBlockStorageObject2.webpage);
+                module.populatePopup(easyBlockStorageObject2.ebay);
+                module.initializeHideAndUnhideButtons(easyBlockStorageObject2.ebay);
+            }).catch(err => {
+                console.error('Failed to load eBay specific code', err);
+            });
         }
-    );
+    }).catch(err => {
+        console.error('Failed to retrieve easyBlockStorageObject from storage', err);
+    });
 });
-
-function populateWebsiteHeader(base_url) {
-    if (base_url !== "") {
-        $("#forWebsite").text(
-            `for ${base_url.replace("https://", "").replace("www.", "")}`
-        );
-    }
-}
-
-function populatePopup() {
-    // If there are sellers in the ebay object, remove the default list item and add each seller in the list.
-    if (easyBlockStorageObject2.ebay.sellers.length > 0) {
-        $(".seller-list-group .default-list-item").remove();
-        $.each(easyBlockStorageObject2.ebay.sellers, function (index, value) {
-            addListItem(".seller-list-group", value);
-        });
-    }
-
-    // If there are items in the ebay object, remove the default list item and add each item in the list.
-    if (easyBlockStorageObject2.ebay.items.length > 0) {
-        $(".item-list-group .default-list-item").remove();
-        $.each(easyBlockStorageObject2.ebay.items, function (index, value) {
-            addListItem(".item-list-group", value);
-        });
-    }
-
-    // Update settings
-    if (easyBlockStorageObject2.ebay.hideSponsored) {
-        $('input[id="hideSponsoredCheck"]').prop("checked", true);
-    }
-    $('input[id="hideSponsoredCheck"]').on("change", function () {
-        easyBlockStorageObject2.ebay.hideSponsored = $(this).is(":checked");
-        $("#refreshToApply").removeClass("d-none");
-        updateStorageList2();
-    });
-
-    if (easyBlockStorageObject2.ebay.hideSellersFewerThanReviews > 0) {
-        $('input[id="hideFewerThanReviews"]').val(easyBlockStorageObject2.ebay.hideSellersFewerThanReviews);
-    }
-    $("#submitHideFewerThanReviews").on("click", function () {
-        easyBlockStorageObject2.ebay.hideSellersFewerThanReviews = parseInt($("#hideFewerThanReviews").val().toString());
-        $("#refreshToApply").removeClass("d-none");
-        updateStorageList2();
-    });
-
-    if (easyBlockStorageObject2.ebay.hideSellersLowerThanReviews > 0) {
-        $('input[id="hideLowerThanReviews"]').val(easyBlockStorageObject2.ebay.hideSellersLowerThanReviews);
-    }
-    $("#submitHideLowerThanReviews").on("click", function () {
-        easyBlockStorageObject2.ebay.hideSellersLowerThanReviews = parseInt($("#hideLowerThanReviews").val().toString());
-        $("#refreshToApply").removeClass("d-none");
-        updateStorageList2();
-    });
-
-    document.getElementById("refreshToApply").addEventListener("click", () => {
-        console.log("refreshing page");
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (tabs[0].id) {
-                chrome.tabs.reload(tabs[0].id);
-            }
-        });
-    });
-
-    
-}
-
-function initializeHideAndUnhideButtons() {
-    $(".list-group").on("click", ".remove-button", function () {
-        let listGroup = $(this).closest("ul");
-        let listItem = $(this).parent().get(0);
-        let removedValue = $(listItem).find("a").first().text();
-        if ($(listGroup).hasClass("seller-list-group")) {
-            easyBlockStorageObject2.ebay.sellers = $.grep(easyBlockStorageObject2.ebay.sellers, function (value) {
-                return value != removedValue;
-            });
-        } else {
-            easyBlockStorageObject2.ebay.items = $.grep(easyBlockStorageObject2.ebay.items, function (value) {
-                return value != removedValue;
-            });
-        }
-        updateStorageList2();
-        $(listItem).remove();
-        let listCount = $(listGroup).children().length;
-        if (listCount === 0) {
-            let message = $(listGroup).hasClass("seller-list-group") ? "No sellers hidden..." : "No items hidden...";
-            $(listGroup).html('<li class="list-group-item align-items-center default-list-item">' + message + "</li>");
-        }
-        console.log("removed list item: " + removedValue);
-    });
-
-    $(".hide-button").on("click", function (e) {
-        let inputGroup = $(this).closest(".input-group");
-        let input = $(inputGroup).children("input").first();
-        if ($(input).hasClass("userid-input")) {
-            let value = $(input).val().toLowerCase();
-            if (isValidUserID(inputGroup, value)) {
-                completeListUpdate(".seller-list-group", value);
-                $(input).val("");
-            }
-        } else {
-            let value = $(input).val();
-            if (isValidItemNumber(inputGroup, value)) {
-                completeListUpdate(".item-list-group", value);
-                $(input).val("");
-            }
-        }
-    });
-}
-
-/**
-     * Saves the storage object to local storage.
-     */
-function updateStorageList2() {
-    chrome.storage.local.set(
-        {
-            easyBlockStorageObject: easyBlockStorageObject2,
-        },
-        function () {
-            console.log("popup.js updated easyBlockStorageObject2:", JSON.stringify(easyBlockStorageObject2));
-        }
-    );
-}
-
-/********************************************************
- *             Seller & Item List Functions             *
- *******************************************************/
-
-
-/**
- * Checks if a given string is a valid eBay seller user ID.
- *
- * Returns false if the input is too short or too long,
- * or if the user ID already exists in the list.
- * Returns true if the input is valid.
- * @param {object} inputGroup The input group containing the text input field.
- * @param {string} userID The text entered by the user.
- * @return {boolean} False if the input is invalid, true otherwise.
- */
-function isValidUserID(inputGroup, userID) {
-    let feedbackDiv = $(inputGroup).siblings(".invalid-feedback").first();
-    if (/[%\s\/]/.test(userID) || userID.length < 1 || userID.length > 64) {
-        $("input", inputGroup).addClass("is-invalid");
-        $(feedbackDiv).addClass("d-block").text("Please provide a valid eBay seller user ID.");
-        return false;
-    } else if (easyBlockStorageObject2.ebay.sellers.includes(userID)) {
-        $("input", inputGroup).addClass("is-invalid");
-        $(feedbackDiv).addClass("d-block").text("You have already added this seller to the list.");
-        return false;
-    } else {
-        $("input", inputGroup).removeClass("is-invalid");
-        $(feedbackDiv).removeClass("d-block");
-        return true;
-    }
-}
-
-/**
- * Checks if a given string is a valid eBay item number.
- *
- * Returns false if the input is not a 12-digit number,
- * or if the item number already exists in the list.
- * Returns true if the input is valid.
- * @param {object} inputGroup The input group containing the text input field.
- * @param {string} itemNumber The text entered by the user.
- * @return {boolean} False if the input is invalid, true otherwise.
- */
-function isValidItemNumber(inputGroup, itemNumber) {
-    let feedbackDiv = $(inputGroup).siblings(".invalid-feedback").first();
-    if (itemNumber.length !== 12 || !/^\d+$/.test(itemNumber)) {
-        $("input", inputGroup).addClass("is-invalid");
-        $(feedbackDiv).addClass("d-block").text("Please provide a valid eBay item number.");
-        return false;
-    } else if (easyBlockStorageObject2.ebay.items.includes(itemNumber)) {
-        $("input", inputGroup).addClass("is-invalid");
-        $(feedbackDiv).addClass("d-block").text("You have already added this item to the list.");
-        return false;
-    } else {
-        $("input", inputGroup).removeClass("is-invalid");
-        $(feedbackDiv).removeClass("d-block");
-        return true;
-    }
-}
-
-/**
- * Completes the process of adding a new item to the list.
- *
- * If the list was empty, this function removes the default list item.
- * It then adds the new item to the list, and scrolls to the bottom of the list.
- * Finally, it updates the list stored in local storage.
- * @param {object} listGroup The list group containing the new item.
- * @param {string} value The text of the new item.
- */
-function completeListUpdate(listGroup, value) {
-    if ($(listGroup).children().length === 1) {
-        let listItem = $(listGroup).children().first();
-        if ($(listItem).hasClass("default-list-item")) {
-            $(listItem).remove();
-        }
-    }
-    addListItem(listGroup, value);
-    let bottom = $("li:last-child", listGroup).offset().top;
-    $("li:last-child", listGroup).scrollTop(bottom);
-    if ($(listGroup).hasClass("seller-list-group")) {
-        easyBlockStorageObject2.ebay.sellers.push(value);
-    } else {
-        easyBlockStorageObject2.ebay.items.push(value);
-    }
-    updateStorageList2();
-}
-
-
-
-/**
- * Adds a new list item to the list group specified by the selector.
- * The value parameter is the text of the new item.
- * @param {string} selector The selector of the list group to add the item to.
- * @param {string} value The text of the new item.
- */
-function addListItem(selector, value) {
-    let href =
-        easyBlockStorageObject2.ebay.base_url === "" ? "https://ebay.com" : easyBlockStorageObject2.ebay.base_url;
-    if ($(selector).hasClass("seller-list-group")) {
-        href += "/usr/" + value;
-    } else {
-        href += "/itm/" + value;
-    }
-    let listItem =
-        '<li class="list-group-item d-flex justify-content-between align-items-center">' +
-        '<div class="link-container">' +
-        '<a class="list-item-link text-danger" target="_blank" href="' +
-        href +
-        '">' +
-        value +
-        "</a>" +
-        "</div>" +
-        '<button type="button" name="remove" class="btn btn-outline-danger py-0 remove-button">x</button>' +
-        "</li>";
-
-    $(selector).append(listItem);
-    console.log("added list item: " + value);
-}

@@ -15,7 +15,22 @@ p {
 }
 
 .container {
+    position: relative;
     margin: 15px 0;
+}
+
+.header {
+    font-family: 'Nunito', sans-serif;
+    color: #F1F1F1;
+    background-color:#DC3646;
+}
+
+.header h3 {
+    margin: 0;
+}
+
+.header h5 {
+    margin: 0;
 }
 
 .nav-tabs .nav-link {
@@ -78,4 +93,53 @@ p {
 
 .default-list-item {
     color: #636363;
+}
+
+/* Left side of the row (label + input) */
+.left {
+    display: flex;
+    align-items: baseline;
+}
+
+.left label {
+    margin-right: 5px;
+}
+
+/* Right side (OK button) */
+.right {
+    margin-left: auto;
+}
+
+/* Ensure the row doesn't wrap and forces content to stay on the same line */
+.row {
+    white-space: nowrap;
+    margin-bottom: 10px;
+}
+
+/* Textbox size */
+input[type="text"] {
+    width: 40px;
+    padding: 3px;
+    margin-right: 5px;
+}
+
+.invisible-button {
+    display: none;
+}
+
+.comingSoonNotice {
+    position: relative;
+    font-style: italic;
+    color: #a11111;
+    text-align: center;
+    font-size: 14px;
+    padding-top:0;
+    padding-bottom:0;
+    height: 0px;
+    top: -8px;
+}
+
+.disabled {
+    opacity: 0.5;
+    background-color:#EEEEEE !important;
 }

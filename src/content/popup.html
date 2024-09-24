@@ -8,21 +8,67 @@
     <title>Ebay Seller Hide</title>
 
     <link rel="stylesheet" href="./css/bootstrap.min.css">
-    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="./css/popup.css">
 </head>
 
 <body>
+    <div class="header">
+        <h3>easyBlock</h3>
+        <h5 id="forWebsite" value="for website">for website</h5>
+    </div>
     <nav>
         <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
-            <a class="nav-item nav-link active" id="nav-sellers-tab" data-toggle="tab" href="#nav-sellers" role="tab"
-                aria-controls="nav-home" aria-selected="true">Sellers</a>
+            <a class="nav-item nav-link active" id="nav-settings-tab" data-toggle="tab" href="#nav-settings" role="tab"
+                aria-controls="nav-home" aria-selected="true">Settings</a>
+            <a class="nav-item nav-link" id="nav-sellers-tab" data-toggle="tab" href="#nav-sellers" role="tab"
+                aria-controls="nav-profile" aria-selected="false">Sellers</a>
             <a class="nav-item nav-link" id="nav-items-tab" data-toggle="tab" href="#nav-items" role="tab"
                 aria-controls="nav-profile" aria-selected="false">Items</a>
         </div>
     </nav>
     <div class="container">
         <div class="tab-content" id="nav-tabContent">
-            <div class="tab-pane fade show active" id="nav-sellers" role="tabpanel" aria-labelledby="nav-sellers-tab">
+            <div class="tab-pane fade show active" id="nav-settings" role="tabpanel" aria-labelledby="nav-settings-tab">
+                <div class="container">
+                    <br>
+                    <div class="disabled">
+                        <input type="checkbox" id="hideSponsoredCheck" disabled>
+                        <label for="hideSponsoredCheck"> Hide Sponsored Items</label>
+                        <label class="comingSoonNotice">ⓘ Coming Soon</label>
+                    </div>
+                    <label>Hide sellers with:</label>
+                    <div class="row">
+                        <div class="left">
+                            <label for="hideFewerThanReviews">Fewer than</label>
+                            <input type="text" id="hideFewerThanReviews" size="1" value="0">
+                            <label for="hideFewerThanReviews">reviews</label>
+                        </div>
+                        <div class="right">
+                            <button class="btn btn-outline-danger" type="button" id="submitHideFewerThanReviews">
+                                <span>OK</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="left">
+                            <label for="hideLowerThanReviews">Reviews below</label>
+                            <input type="text" id="hideLowerThanReviews" size="1" value="0">
+                            <label for="hideLowerThanReviews">%</label>
+                        </div>
+                        <div class="right">
+                            <button class="btn btn-outline-danger" type="button" id="submitHideLowerThanReviews">
+                                <span>OK</span>
+                            </button>
+                        </div>
+                    </div>
+                    <br>
+                    <button class="btn btn-outline-danger d-none" type="button" id="refreshToApply">
+                        <span>Refresh To Apply</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="nav-sellers" role="tabpanel" aria-labelledby="nav-sellers-tab">
                 <div class="container">
                     <!-- <h3>Hidden Sellers</h3> -->
                     <ul class="list-group list-group-flush seller-list-group">
@@ -68,7 +114,7 @@
 
     <script src="../resources/jquery-3.4.1.min.js"></script>
     <script src="../resources/bootstrap.min.js"></script>
-    <script src="./popup.js"></script>
+    <script src="./popup.js" type="module" defer></script>
 </body>
 
 </html>

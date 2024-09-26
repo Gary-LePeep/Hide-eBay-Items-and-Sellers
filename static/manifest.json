@@ -14,7 +14,7 @@
       "48": "icon48.png",
       "128": "icon128.png"
     },
-    "default_popup": "popup/popup-default.html"
+    "default_popup": "popup/popup-loading.html"
   },
   "action": {
     "default_icon": {
@@ -22,7 +22,7 @@
       "48": "icon48.png",
       "128": "icon128.png"
     },
-    "default_popup": "popup/popup-default.html"
+    "default_popup": "popup/popup-loading.html"
   },
   "content_scripts": [
     {

@@ -22,12 +22,17 @@ async function init() {
 export async function processSearchPage() {
     await init();
 
-    const searchResultLists = ["ul.srp-results", "ul#ListViewInner", "ul.b-list__items_nofooter"];
+    const searchResultLists = ["ul.srp-results", "ul#ListViewInner", "ul.b-list__items_nofooter", "ul.brwrvr__item-results"];
     const currentList = searchResultLists.map(item => $(item)).find(list => list.length > 0);
 
     if (!currentList) return;
 
-    const divSelector = currentList.attr("id") === "ListViewInner" ? "li.sresult" : "li .s-item__wrapper";
+    let divSelector = "li .s-item__wrapper";
+    if (currentList.attr("id") === "ListViewInner") {
+        divSelector = "li.sresult";
+    } else if (currentList.hasClass("brwrvr__item-results brwrvr__item-results--list")) {
+        divSelector = "li .brwrvr__item-card__body .brwrvr__item-card__wrapper";
+    }
 
     hidePreviouslyHiddenItems(currentList[0], divSelector);
     hidePreviouslyHiddenSellers(currentList[0]);
@@ -161,7 +166,7 @@ function extractSellerUserId(sellerHref: string): string {
     let sellerUserId = "";
     const parts = sellerHref.split(/\/(str|usr|sch)\//);
     if (parts.length > 1) {
-        sellerUserId = parts[1].split("?")[0].split("/")[0];
+        sellerUserId = parts[2].split("?")[0].split("/")[0];
     }
     return sellerUserId;
 }

@@ -36,11 +36,13 @@ function handlePageAction(tabId: number, url: string) {
         chrome.action.setPopup({ tabId, popup: PAGE_POPUP_MAP[matchedKey] });
         if (navigator.userAgent.search("Firefox") > 0) {
             chrome.pageAction.show(tabId);
+            chrome.pageAction.setPopup({ tabId, popup: PAGE_POPUP_MAP[matchedKey] });
         }
     } else {
         chrome.action.setPopup({ tabId, popup: 'popup/popup-default.html' });
         if (navigator.userAgent.search("Firefox") > 0) {
             chrome.pageAction.hide(tabId);
+            chrome.pageAction.setPopup({ tabId, popup: 'popup/popup-default.html' });
         }
     }
 }
@@ -51,8 +53,8 @@ function handlePageAction(tabId: number, url: string) {
 function setupListeners() {
     // Listener for tab updates
     chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-        if (changeInfo.url) {
-            handlePageAction(tabId, changeInfo.url);
+        if (changeInfo.status === 'complete' && tab.url) {
+            handlePageAction(tabId, tab.url);
         }
     });
 

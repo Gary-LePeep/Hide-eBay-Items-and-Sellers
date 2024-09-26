@@ -1,18 +1,12 @@
-import { getEasyBlockStorageObject, setEasyBlockStorageObject, EasyBlockStorageObject } from './storage';
+import { getEasyBlockStorageObject, setEasyBlockStorageObject } from './storage';
 import { processSearchPage, processItemPage, processUserPage } from './content-ebay';
 
-/********************************************************
- *                   Browser Storage                    *
- *******************************************************/
-
-let easyBlockStorageObject: EasyBlockStorageObject;
-
 /**
- * Initializes the storage object and processes the webpage.
+ * Initializes the storage and processes the webpage.
  */
 async function init() {
     try {
-        easyBlockStorageObject = await getEasyBlockStorageObject();
+        const easyBlockStorageObject = await getEasyBlockStorageObject();
         console.warn('content.js retrieved easyBlockStorageObject', JSON.stringify(easyBlockStorageObject));
         processWebpage();
     } catch (error) {
@@ -20,58 +14,29 @@ async function init() {
     }
 }
 
-/**
- * Saves the storage object to local storage.
- */
-export async function updateStorageList() {
-    try {
-        await setEasyBlockStorageObject(easyBlockStorageObject);
-    } catch (error) {
-        console.error('Failed to update easyBlockStorageObject:', error);
-    }
-}
+// Initialize the script
+init();
 
 /**
- * Listens for changes to the storage object and updates it if a change is detected.
- */
-chrome.storage.onChanged.addListener(function (changes, namespace) {
-    for (var key in changes) {
-        if (key === "easyBlockStorageObject") {
-            easyBlockStorageObject = changes[key].newValue;
-        }
-    }
-});
-
-/********************************************************
- *                   Process Webpage                    *
- *******************************************************/
-
-/**
- * Process Webpage
- *
- * This function checks the URL for one of the following subdirectories:
- * Ebay:
- *   `sch` or `b`: This is a search or category page.
- *   `itm` or `p`: This is a page for an item or category-item.
- *   `usr` or `str`: This is the page of a user.
- * Depending on which type of page it is, process that type of webpage.
+ * Processes the webpage based on the current URL.
  */
 function processWebpage() {
-    easyBlockStorageObject.webpage = window.location.origin;
-    updateStorageList();
+    getEasyBlockStorageObject().then((easyBlockStorageObject) => {
+        easyBlockStorageObject.webpage = window.location.origin;
+        setEasyBlockStorageObject(easyBlockStorageObject);
 
-    if (/^https:\/\/(.+?\.)?ebay\./.test(window.location.origin)) {
-        easyBlockStorageObject.ebay.base_url = window.location.origin;
+        if (/^https:\/\/(.+?\.)?ebay\./.test(window.location.origin)) {
+            easyBlockStorageObject.ebay.base_url = window.location.origin;
 
-        // Check the URL and call the appropriate function
-        if (/^https:\/\/(.+?\.)?ebay\..+?\/(sch|b)\/.+/.test(window.location.href)) {
-            processSearchPage();
-        } else if (/^https:\/\/(.+?\.)?ebay\..+?\/(itm|p)\/.+/.test(window.location.href)) {
-            processItemPage();
-        } else if (/^https:\/\/(.+?\.)?ebay\..+?\/(usr|str)\/.+/.test(window.location.href)) {
-            processUserPage();
+            if (/^https:\/\/(.+?\.)?ebay\..+?\/(sch|b)\/.+/.test(window.location.href)) {
+                processSearchPage();
+            } else if (/^https:\/\/(.+?\.)?ebay\..+?\/(itm|p)\/.+/.test(window.location.href)) {
+                processItemPage();
+            } else if (/^https:\/\/(.+?\.)?ebay\..+?\/(usr|str)\/.+/.test(window.location.href)) {
+                processUserPage();
+            }
         }
-    }
+    });
 }
 
 /**
@@ -94,6 +59,3 @@ export function insertButton(size: number, title: string, classList: string, con
     const $container = contSelector instanceof HTMLElement ? $(contSelector) : contSelector;
     $container.append(input);
 }
-
-// Initialize the script
-init();

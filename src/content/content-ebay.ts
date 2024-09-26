@@ -1,81 +1,67 @@
 import { getEasyBlockStorageObject, setEasyBlockStorageObject, EasyBlockStorageObject } from './storage';
 import { insertButton } from './content';
 
-let easyBlockStorageObject: EasyBlockStorageObject;
-
 /**
- * Initializes the storage object.
- */
-async function init() {
-    try {
-        easyBlockStorageObject = await getEasyBlockStorageObject();
-    } catch (error) {
-        console.error('Failed to retrieve easyBlockStorageObject:', error);
-    }
-}
-
-/**
- * Process Search Page
- * This function processes the eBay search page by hiding previously hidden items and sellers
- * and adding hide buttons to the remaining items.
+ * Initializes and processes the storage object for search page.
  */
 export async function processSearchPage() {
-    await init();
+    try {
+        const easyBlockStorageObject = await getEasyBlockStorageObject();
 
-    const searchResultLists = ["ul.srp-results", "ul#ListViewInner", "ul.b-list__items_nofooter", "ul.brwrvr__item-results"];
-    const currentList = searchResultLists.map(item => $(item)).find(list => list.length > 0);
+        const searchResultLists = ["ul.srp-results", "ul#ListViewInner", "ul.b-list__items_nofooter", "ul.brwrvr__item-results"];
+        const currentList = searchResultLists.map(item => $(item)).find(list => list.length > 0);
+        if (!currentList) return;
 
-    if (!currentList) return;
+        let divSelector = "li .s-item__wrapper";
+        if (currentList.attr("id") === "ListViewInner") {
+            divSelector = "li.sresult";
+        } else if (currentList.hasClass("brwrvr__item-results brwrvr__item-results--list")) {
+            divSelector = "li .brwrvr__item-card__body .brwrvr__item-card__wrapper";
+        }
 
-    let divSelector = "li .s-item__wrapper";
-    if (currentList.attr("id") === "ListViewInner") {
-        divSelector = "li.sresult";
-    } else if (currentList.hasClass("brwrvr__item-results brwrvr__item-results--list")) {
-        divSelector = "li .brwrvr__item-card__body .brwrvr__item-card__wrapper";
+        hidePreviouslyHiddenItems(currentList[0], divSelector);
+        hidePreviouslyHiddenSellers(currentList[0]);
+
+        const classList = "hide-item-button eh-not-hidden";
+        const items = $(divSelector, currentList[0]);
+        insertButton(30, "Hide item from search results.", classList, items);
+        $($(divSelector, currentList[0])).on("click", ".hide-item-button", hideItem);
+    } catch (error) {
+        console.error('Failed to process search page:', error);
     }
-
-    hidePreviouslyHiddenItems(currentList[0], divSelector);
-    hidePreviouslyHiddenSellers(currentList[0]);
-
-    const classList = "hide-item-button eh-not-hidden";
-    const items = $(divSelector, currentList[0]);
-    insertButton(30, "Hide item from search results.", classList, items);
-    $($(divSelector, currentList[0])).on("click", ".hide-item-button", hideItem);
 }
 
-/**
- * Hides items that have been previously hidden based on the storage object.
- */
 function hidePreviouslyHiddenItems(currentList: HTMLElement, divSelector: string) {
-    const items = divSelector === "li.sresult" ? $("li.sresult", currentList) : $("li .s-item__info .s-item__link", currentList);
+    getEasyBlockStorageObject().then((easyBlockStorageObject) => {
+        const items = divSelector === "li.sresult" ? $("li.sresult", currentList) : $("li .s-item__info .s-item__link", currentList);
 
-    items.each(function () {
-        const itemNumber = divSelector === "li.sresult" ? $(this).attr("listingid") : getItemNumber($(this).attr("href"));
-        if (itemNumber && easyBlockStorageObject.ebay.items.includes(itemNumber)) {
-            $(this).closest("li").remove();
-        }
+        items.each(function () {
+            const itemNumber = divSelector === "li.sresult" ? $(this).attr("listingid") : getItemNumber($(this).attr("href"));
+            if (itemNumber && easyBlockStorageObject.ebay.items.includes(itemNumber)) {
+                $(this).closest("li").remove();
+            }
+        });
     });
 }
 
-/**
- * Hides sellers that have been previously hidden based on the storage object.
- */
 function hidePreviouslyHiddenSellers(currentList: HTMLElement) {
-    $("li .s-item__info .s-item__seller-info-text", currentList).each(function () {
-        const sellerInfoString = $(this).text();
-        const sellerInfo = processSellerInfo(sellerInfoString);
+    getEasyBlockStorageObject().then((easyBlockStorageObject) => {
+        $("li .s-item__info .s-item__seller-info-text", currentList).each(function () {
+            const sellerInfoString = $(this).text();
+            const sellerInfo = processSellerInfo(sellerInfoString);
 
-        if (sellerInfo.sellerName && easyBlockStorageObject.ebay.sellers.includes(sellerInfo.sellerName)) {
-            $(this).closest("li").remove();
-        }
+            if (sellerInfo.sellerName && easyBlockStorageObject.ebay.sellers.includes(sellerInfo.sellerName)) {
+                $(this).closest("li").remove();
+            }
 
-        if (sellerInfo.sellerRating < easyBlockStorageObject.ebay.hideSellersLowerThanReviews) {
-            $(this).closest("li").remove();
-        }
+            if (sellerInfo.sellerRating < easyBlockStorageObject.ebay.hideSellersLowerThanReviews) {
+                $(this).closest("li").remove();
+            }
 
-        if (sellerInfo.sellerReviewCount < easyBlockStorageObject.ebay.hideSellersFewerThanReviews) {
-            $(this).closest("li").remove();
-        }
+            if (sellerInfo.sellerReviewCount < easyBlockStorageObject.ebay.hideSellersFewerThanReviews) {
+                $(this).closest("li").remove();
+            }
+        });
     });
 }
 
@@ -100,28 +86,29 @@ function getItemNumber(url: string) {
 }
 
 /**
- * Hide Item
- * Hides an item from the search results when the hide button is clicked.
+ * Hides item from search results on button click.
  */
 function hideItem() {
-    let itemNumber = "";
-    const itemName = $(this).siblings(".s-item__info").first().children(".s-item__link").first().children("h3").first().text();
+    getEasyBlockStorageObject().then((easyBlockStorageObject) => {
+        let itemNumber = "";
+        const itemName = $(this).siblings(".s-item__info").first().children(".s-item__link").first().children("h3").first().text();
 
-    if ($(this).parent("li").hasClass("sresult")) {
-        itemNumber = $(this).parent("li.sresult").attr("listingid");
-    } else {
-        const a = $(this).siblings(".s-item__info").first().children(".s-item__link").first();
-        itemNumber = getItemNumber($(a).attr("href"));
-    }
-
-    if (itemNumber) {
-        if (!easyBlockStorageObject.ebay.items.includes(itemNumber)) {
-            easyBlockStorageObject.ebay.items.push(itemNumber);
-            updateStorageList();
+        if ($(this).parent("li").hasClass("sresult")) {
+            itemNumber = $(this).parent("li.sresult").attr("listingid");
+        } else {
+            const a = $(this).siblings(".s-item__info").first().children(".s-item__link").first();
+            itemNumber = getItemNumber($(a).attr("href"));
         }
-        $(this).closest("li").remove();
-        console.log(`Item number ${itemNumber} was hidden`);
-    }
+
+        if (itemNumber) {
+            if (!easyBlockStorageObject.ebay.items.includes(itemNumber)) {
+                easyBlockStorageObject.ebay.items.push(itemNumber);
+                setEasyBlockStorageObject(easyBlockStorageObject);
+            }
+            $(this).closest("li").remove();
+            console.log(`Item number ${itemNumber} was hidden`);
+        }
+    });
 }
 
 /**
@@ -129,20 +116,21 @@ function hideItem() {
  * Handles processing of the eBay item page to add the seller hide button.
  */
 export async function processItemPage() {
-    await init();
+    getEasyBlockStorageObject().then((easyBlockStorageObject) => {
+        
+        const sellerHref = $(".x-sellercard-atf__info__about-seller a").first().attr("href");
+        const sellerUserId = extractSellerUserId(sellerHref);
 
-    const sellerHref = $(".x-sellercard-atf__info__about-seller a").first().attr("href");
-    const sellerUserId = extractSellerUserId(sellerHref);
+        const userIdHideButtonDiv = document.createElement("div");
+        $(".x-sellercard-atf__info__about-seller a").parent("div").first().append(userIdHideButtonDiv);
+        userIdHideButtonDiv.style.cssText = `position: relative; left: 25px; top: -2px`;
 
-    const userIdHideButtonDiv = document.createElement("div");
-    $(".x-sellercard-atf__info__about-seller a").parent("div").first().append(userIdHideButtonDiv);
-    userIdHideButtonDiv.style.cssText = `position: relative; left: 25px; top: -2px`;
-
-    const classList = `hide-seller-button ${easyBlockStorageObject.ebay.sellers.includes(sellerUserId) ? "eh-is-hidden" : "eh-not-hidden"}`;
-    insertButton(22, "Hide seller's items from search results.", classList, userIdHideButtonDiv);
-    $(userIdHideButtonDiv).on("click", ".hide-seller-button", function () {
-        $(this).toggleClass("eh-is-hidden eh-not-hidden");
-        updateSellerHiddenStatus(sellerUserId);
+        const classList = `hide-seller-button ${easyBlockStorageObject.ebay.sellers.includes(sellerUserId) ? "eh-is-hidden" : "eh-not-hidden"}`;
+        insertButton(22, "Hide seller's items from search results.", classList, userIdHideButtonDiv);
+        $(userIdHideButtonDiv).on("click", ".hide-seller-button", function () {
+            $(this).toggleClass("eh-is-hidden eh-not-hidden");
+            updateSellerHiddenStatus(easyBlockStorageObject, sellerUserId);
+        });
     });
 }
 
@@ -150,13 +138,13 @@ export async function processItemPage() {
  * Update Seller Hidden Status
  * Updates the hidden status of a seller based on the user's action.
  */
-function updateSellerHiddenStatus(sellerUserID: string) {
+async function updateSellerHiddenStatus(easyBlockStorageObject: EasyBlockStorageObject, sellerUserID: string) {
     if (easyBlockStorageObject.ebay.sellers.includes(sellerUserID)) {
         easyBlockStorageObject.ebay.sellers = easyBlockStorageObject.ebay.sellers.filter(seller => seller !== sellerUserID);
     } else {
         easyBlockStorageObject.ebay.sellers.push(sellerUserID);
     }
-    updateStorageList();
+    await setEasyBlockStorageObject(easyBlockStorageObject);
 }
 
 /**
@@ -176,35 +164,24 @@ function extractSellerUserId(sellerHref: string): string {
  * Handles processing of the eBay user page to add the seller hide button.
  */
 export async function processUserPage() {
-    await init();
+    getEasyBlockStorageObject().then((easyBlockStorageObject) => {
+        const sellerInfoDivs = document.getElementsByClassName("str-seller-card__store-name");
+        if (sellerInfoDivs.length !== 1) {
+            console.warn(`Expected 1 user on this user page, but actually found ${sellerInfoDivs.length}:`, sellerInfoDivs);
+            return;
+        }
 
-    const sellerInfoDivs = document.getElementsByClassName("str-seller-card__store-name");
-    if (sellerInfoDivs.length !== 1) {
-        console.warn(`Expected 1 user on this user page, but actually found ${sellerInfoDivs.length}:`, sellerInfoDivs);
-        return;
-    }
+        const sellerUserId = sellerInfoDivs[0].getElementsByTagName("h1")[0].getElementsByTagName("a")[0].innerText.toLowerCase();
 
-    const sellerUserID = sellerInfoDivs[0].getElementsByTagName("h1")[0].getElementsByTagName("a")[0].innerText.toLowerCase();
+        const userIdHideButtonDiv = document.createElement("div");
+        sellerInfoDivs[0].getElementsByTagName("h1")[0].appendChild(userIdHideButtonDiv);
+        userIdHideButtonDiv.style.cssText = `position: relative; left: 35px; top: 2px`;
 
-    const userIdHideButtonDiv = document.createElement("div");
-    sellerInfoDivs[0].getElementsByTagName("h1")[0].appendChild(userIdHideButtonDiv);
-    userIdHideButtonDiv.style.cssText = `position: relative; left: 35px; top: 2px`;
-
-    const classList = `hide-seller-button ${easyBlockStorageObject.ebay.sellers.includes(sellerUserID) ? "eh-is-hidden" : "eh-not-hidden"}`;
-    insertButton(30, "Hide seller's items from search results.", classList, userIdHideButtonDiv);
-    $(userIdHideButtonDiv).on("click", ".hide-seller-button", function () {
-        $(this).toggleClass("eh-is-hidden eh-not-hidden");
-        updateSellerHiddenStatus(sellerUserID);
+        const classList = `hide-seller-button ${easyBlockStorageObject.ebay.sellers.includes(sellerUserId) ? "eh-is-hidden" : "eh-not-hidden"}`;
+        insertButton(30, "Hide seller's items from search results.", classList, userIdHideButtonDiv);
+        $(userIdHideButtonDiv).on("click", ".hide-seller-button", function () {
+            $(this).toggleClass("eh-is-hidden eh-not-hidden");
+            updateSellerHiddenStatus(easyBlockStorageObject, sellerUserId);
+        });
     });
-}
-
-/**
- * Saves the storage object to local storage.
- */
-export async function updateStorageList() {
-    try {
-        await setEasyBlockStorageObject(easyBlockStorageObject);
-    } catch (error) {
-        console.error('Failed to update easyBlockStorageObject:', error);
-    }
 }

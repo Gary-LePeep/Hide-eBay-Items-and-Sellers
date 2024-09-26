@@ -14,7 +14,7 @@
       "48": "icon48.png",
       "128": "icon128.png"
     },
-    "default_popup": "popup/popup.html"
+    "default_popup": "popup/popup-default.html"
   },
   "action": {
     "default_icon": {
@@ -22,14 +22,13 @@
       "48": "icon48.png",
       "128": "icon128.png"
     },
-    "default_popup": "popup/popup.html"
+    "default_popup": "popup/popup-default.html"
   },
   "content_scripts": [
     {
       "js": ["resources/jquery-3.4.1.min.js", "content.bundle.js"],
       "css": ["popup/css/content.css"],
       "matches": ["*://*/*"],
-      "include_globs": ["*://*.ebay.*/*"],
       "run_at": "document_end"
     }
   ],
@@ -42,12 +41,16 @@
       "resources": [
         "icon128.png",
         "icon16.png",
-        "icon48.png"
+        "icon48.png",
+        "popup-ebay.html",
+        "popup-facebook.html",
+        "popup-bestbuy.html",
+        "popup-default.html"
       ],
       "matches": ["*://*/*"]
     }
   ],
-  "permissions": ["storage", "unlimitedStorage", "tabs", "declarativeContent", "active_tab", "webRequest", "webRequestBlocking", "scripting"],
+  "permissions": ["storage", "unlimitedStorage", "tabs", "declarativeContent", "activeTab", "webRequest", "webRequestBlocking", "scripting", "page_action"],
   "host_permissions": [
     "https://*.ebay.com/*",
     "https://*.ebay.com.au/*",

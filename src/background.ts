@@ -1,114 +1,96 @@
-/********************************************************
- *                   Browser Storage                    *
- *******************************************************/
-
-let easyBlockStorageObject = {
-    webpage: "",
-    ebay: {
-        sellers: [],
-        items: [],
-        hideSponsored: false,
-        hideSellersFewerThanReviews: 0,
-        hideSellersLowerThanReviews: 0,
-        base_url: "",
-    },
+/**
+ * A map of supported platforms and their corresponding page URL regex patterns.
+ */
+const PAGE_REGEX_MAP: { [key: string]: string } = {
+    ebay: '^https://(.+?\\.)?ebay\\.',
+    facebookMarketplace: '^https://(.+?\\.)?facebook\\.',
+    bestbuy: '^https://(.+?\\.)?bestbuy\\.',
+    // Add more platforms here
 };
 
 /**
- * Saves the storage object to local storage.
+ * Handles page action visibility for Firefox.
  */
-function updateStorageListBackground() {
-    chrome.storage.local.set(
-        {
-            easyBlockStorageObject: easyBlockStorageObject,
-        },
-        function () {
-            console.log("background.js updated easyBlockStorageObject:", JSON.stringify(easyBlockStorageObject));
-        }
-    );
+function handlePageActionFirefox(tabId: number, url: string) {
+    let select_page_regex = Object.values(PAGE_REGEX_MAP).join('|');
+    if (new RegExp(select_page_regex).test(url)) {
+        chrome.pageAction.show(tabId);
+        chrome.action.enable(tabId);
+    } else {
+        chrome.pageAction.hide(tabId);
+        chrome.action.disable(tabId);
+    }
 }
 
 /**
- * Listens for changes to the storage object, and updates it if a change is detected.
+ * Set up listeners for Firefox.
  */
-chrome.storage.onChanged.addListener(function (changes, namespace) {
-    for (var key in changes) {
-        if (key === "easyBlockStorageObject") {
-            easyBlockStorageObject = changes[key].newValue;
+function setupListenersFirefox() {
+    // Listener for tab updates and activations in Firefox
+    chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+        if (changeInfo.url) {
+            handlePageActionFirefox(tabId, changeInfo.url);
         }
-    }
-});
+    });
 
-/********************************************************
- *                  Page Action Popup                   *
- *******************************************************/
+    chrome.tabs.onActivated.addListener((activeInfo) => {
+        chrome.tabs.get(activeInfo.tabId, (tab) => {
+            if (tab.url) {
+                handlePageActionFirefox(tab.id, tab.url);
+            }
+        });
+    });
+
+    chrome.runtime.onInstalled.addListener(() => {
+        chrome.tabs.query({}, (tabs) => {
+            for (let tab of tabs) {
+                if (tab.url) {
+                    handlePageActionFirefox(tab.id, tab.url);
+                }
+            }
+        });
+    });
+}
 
 /**
- * Update Page Action Visibility
- *
- * For Chrome, due to page_action being deprecated with manifest version 3 for Google Chrome,
- * a workaround is needed to update the visibility of the popup.
- * The function changes the extension button from managing the extension
- * to showing the item & seller popup as defined in popup.html.
- *
- * For Firefox, page_action works to create an extension button in the url bar on select pages.
- * Likewise, action enables the extension button in the extension toolbar on select pages.
- * For all other pages, the extension button is hidden from the url bar and disabled in the extension toolbar.
- *
- * This function is called when the user navigates to a new page.
- * If the page is a select page, it enables the page action.
- * If the page is not a select page, it hides the page action.
- *
- * @param {string} newUrl The URL of the new page.
- * @param {int} tabId The id of the tab that was updated.
+ * Set up declarative content rules for Chrome.
  */
-let select_page_regex = `(^https:\/\/(.+?\.)?ebay\.)`;
+function setupListenersChrome() {
+    let select_page_regex = Object.values(PAGE_REGEX_MAP).join('|');
 
-//Check if browser is Chrome
-if (navigator.userAgent.search("Chrome") > 0) {
-    // Wrap in an onInstalled callback in order to avoid unnecessary work
-    // every time the background script is run
     chrome.runtime.onInstalled.addListener(() => {
-        // Page actions are disabled by default and enabled on select tabs
         chrome.action.disable();
 
-        // Clear all rules to ensure only our expected rules are set
         chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {
-            // Declare a rule to enable the action on example.com pages
-            let enableOnSelectHostsRule = {
-                conditions: [
-                    new chrome.declarativeContent.PageStateMatcher({
-                        pageUrl: { urlMatches: select_page_regex },
-                    }),
-                ],
-                actions: [new chrome.declarativeContent.ShowAction()],
-            };
+            let rules = [
+                {
+                    conditions: [
+                        new chrome.declarativeContent.PageStateMatcher({
+                            pageUrl: { urlMatches: select_page_regex },
+                        }),
+                    ],
+                    actions: [new chrome.declarativeContent.ShowAction()],
+                },
+            ];
 
-            // Finally, apply our new array of rules
-            let rules = [enableOnSelectHostsRule];
             chrome.declarativeContent.onPageChanged.addRules(rules);
         });
     });
 }
-//Check if browser is Firefox
-else if (navigator.userAgent.search("Firefox") > 0) {
-    function updateVisibility(url, tabId) {
-        if (new RegExp(select_page_regex).test(url)) {
-            chrome.pageAction.show(tabId);
-            chrome.action.enable();
-        } else {
-            chrome.pageAction.hide(tabId);
-            chrome.action.disable();
-        }
+
+/**
+ * Choose the correct page action method based on the browser type.
+ */
+function choosePageAction() {
+    // Check if the browser is Chrome
+    if (navigator.userAgent.includes("Chrome")) {
+        setupListenersChrome();
     }
-
-    chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-        updateVisibility(tab.url, tabId);
-    });
-
-    chrome.tabs.onActivated.addListener(function (activeInfo) {
-        chrome.tabs.get(activeInfo.tabId, function (tab) {
-            updateVisibility(tab.url, tab.id);
-        });
-    });
+    // Check if the browser is Firefox
+    else if (navigator.userAgent.includes("Firefox")) {
+        setupListenersFirefox();
+    }
 }
+
+// Initialize page action logic
+choosePageAction();

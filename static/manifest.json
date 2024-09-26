@@ -42,10 +42,7 @@
         "icon128.png",
         "icon16.png",
         "icon48.png",
-        "popup-ebay.html",
-        "popup-facebook.html",
-        "popup-bestbuy.html",
-        "popup-default.html"
+        "popup/*"
       ],
       "matches": ["*://*/*"]
     }

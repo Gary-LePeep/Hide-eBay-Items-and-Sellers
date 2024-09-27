@@ -4,51 +4,50 @@
   "version": "1.0.0",
   "description": "Hide items, sellers, and sponsored posts that you don't like from appearing in search and category results on your favorite shopping sites.",
   "icons": {
-    "128": "src/resources/icon128.png",
-    "48": "src/resources/icon48.png",
-    "16": "src/resources/icon16.png"
+    "128": "icon128.png",
+    "48": "icon48.png",
+    "16": "icon16.png"
   },
   "page_action": {
     "default_icon": {
-      "16": "src/resources/icon16.png",
-      "48": "src/resources/icon48.png",
-      "128": "src/resources/icon128.png"
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
     },
-    "default_popup": "src/content/popup.html"
+    "default_popup": "popup/popup-loading.html"
   },
   "action": {
     "default_icon": {
-      "16": "src/resources/icon16.png",
-      "48": "src/resources/icon48.png",
-      "128": "src/resources/icon128.png"
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
     },
-    "default_popup": "src/content/popup.html"
+    "default_popup": "popup/popup-loading.html"
   },
   "content_scripts": [
     {
-      "js": ["src/resources/jquery-3.4.1.min.js", "src/content/content.js"],
-      "css": ["src/content/css/content.css"],
+      "js": ["resources/jquery-3.4.1.min.js", "content.bundle.js"],
+      "css": ["popup/css/content.css"],
       "matches": ["*://*/*"],
-      "include_globs": ["*://*.ebay.*/*"],
       "run_at": "document_end"
     }
   ],
   "background": {
-    "scripts": ["src/background.js"],
-    "service_worker": "src/background.js"
+    "scripts": ["background.bundle.js"],
+    "service_worker": "background.bundle.js"
   },
   "web_accessible_resources": [
     {
       "resources": [
-        "src/resources/icon128.png",
-        "src/resources/icon16.png",
-        "src/resources/icon48.png",
-        "src/content/content-ebay.js"
+        "icon128.png",
+        "icon16.png",
+        "icon48.png",
+        "popup/*"
       ],
       "matches": ["*://*/*"]
     }
   ],
-  "permissions": ["storage", "unlimitedStorage", "tabs", "declarativeContent", "active_tab", "webRequest", "webRequestBlocking", "scripting"],
+  "permissions": ["storage", "unlimitedStorage", "tabs", "declarativeContent", "activeTab", "webRequest", "webRequestBlocking", "scripting", "page_action"],
   "host_permissions": [
     "https://*.ebay.com/*",
     "https://*.ebay.com.au/*",

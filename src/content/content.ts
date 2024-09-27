@@ -1,89 +1,42 @@
-/********************************************************
- *                   Browser Storage                    *
- *******************************************************/
-
-let contentStorageObject = {
-    webpage: "",
-    ebay: {
-        sellers: [],
-        items: [],
-        hideSponsored: false,
-        hideSellersFewerThanReviews: 0,
-        hideSellersLowerThanReviews: 0,
-        base_url: "",
-    },
-};
+import { getEasyBlockStorageObject, setEasyBlockStorageObject } from './storage';
+import { processSearchPage, processItemPage, processUserPage } from './content-ebay';
 
 /**
- * Retrieves the storage object from local storage.
+ * Initializes the storage and processes the webpage.
  */
-chrome.storage.local.get(
-    {
-        easyBlockStorageObject: contentStorageObject,
-    },
-    function (data) {
-        contentStorageObject = data.easyBlockStorageObject;
-        console.warn('content.js retrieved contentStorageObject', JSON.stringify(contentStorageObject));
+async function init() {
+    try {
+        const easyBlockStorageObject = await getEasyBlockStorageObject();
+        console.warn('content.js retrieved easyBlockStorageObject', JSON.stringify(easyBlockStorageObject));
         processWebpage();
+    } catch (error) {
+        console.error('Failed to retrieve easyBlockStorageObject:', error);
     }
-);
-
-/**
- * Saves the storage object to local storage.
- */
-function updateStorageList() {
-    chrome.storage.local.set(
-        {
-            easyBlockStorageObject: contentStorageObject,
-        },
-        function () {
-            console.log("content.js updated contentStorageObject:", JSON.stringify(contentStorageObject));
-        }
-    );
 }
 
-/**
- * Listens for changes to the storage object, and updates it if a change is detected.
- */
-chrome.storage.onChanged.addListener(function (changes, namespace) {
-    for (var key in changes) {
-        if (key === "easyBlockStorageObject") {
-            contentStorageObject = changes[key].newValue;
-        }
-    }
-});
-
-/********************************************************
- *                   Process Webpage                    *
- *******************************************************/
+// Initialize the script
+init();
 
 /**
- * Process Webpage
- *
- * This function checks the url for one of the following subdirectories:
- * Ebay:
- *   `sch` or `b`: This is a search or category page.
- *   `itm` or `p`: This is a page for an item or category-item.
- *   `usr` or `str`: This is the page of a user.
- * Depending on which type of page it is, process that type of webpage.
+ * Processes the webpage based on the current URL.
  */
 function processWebpage() {
-    contentStorageObject.webpage = window.location.origin;
-    updateStorageList();
-    if (/^https:\/\/(.+?\.)?ebay\./.test(window.location.origin)) {
-        contentStorageObject.ebay.base_url = window.location.origin;
-        import(chrome.runtime.getURL('src/content/content-ebay.js')).then(module => {
+    getEasyBlockStorageObject().then((easyBlockStorageObject) => {
+        easyBlockStorageObject.webpage = window.location.origin;
+        setEasyBlockStorageObject(easyBlockStorageObject);
+
+        if (/^https:\/\/(.+?\.)?ebay\./.test(window.location.origin)) {
+            easyBlockStorageObject.ebay.base_url = window.location.origin;
+
             if (/^https:\/\/(.+?\.)?ebay\..+?\/(sch|b)\/.+/.test(window.location.href)) {
-                module.processSearchPage();
-            } else if (/^^https:\/\/(.+?\.)?ebay\..+?\/(itm|p)\/.+/.test(window.location.href)) {
-                module.processItemPage();
-            } else if (/^^https:\/\/(.+?\.)?ebay\..+?\/(usr|str)\/.+/.test(window.location.href)) {
-                module.processUserPage();
+                processSearchPage();
+            } else if (/^https:\/\/(.+?\.)?ebay\..+?\/(itm|p)\/.+/.test(window.location.href)) {
+                processItemPage();
+            } else if (/^https:\/\/(.+?\.)?ebay\..+?\/(usr|str)\/.+/.test(window.location.href)) {
+                processUserPage();
             }
-        }).catch(err => {
-            console.error('Failed to load eBay specific code', err);
-        });
-    }
+        }
+    });
 }
 
 /**
@@ -91,9 +44,9 @@ function processWebpage() {
  * @param {number} size The size of the button, in pixels.
  * @param {string} title The title of the button.
  * @param {string} classList The class list of the button.
- * @param {string} contSelecter The container selector where the button should be inserted.
+ * @param {JQuery<HTMLElement> | HTMLElement} contSelector The container selector where the button should be inserted.
  */
-function insertButton(size, title, classList, contSelecter) {
+export function insertButton(size: number, title: string, classList: string, contSelector: JQuery<HTMLElement> | HTMLElement) {
     let input = $("<input/>", {
         class: classList,
         type: "image",
@@ -101,7 +54,8 @@ function insertButton(size, title, classList, contSelecter) {
         height: size,
         title: title,
         alt: "Hide",
-        src: chrome.runtime.getURL("src/resources/icon48.png"),
+        src: chrome.runtime.getURL("icon48.png"),
     });
-    $(contSelecter).append(input);
+    const $container = contSelector instanceof HTMLElement ? $(contSelector) : contSelector;
+    $container.append(input);
 }

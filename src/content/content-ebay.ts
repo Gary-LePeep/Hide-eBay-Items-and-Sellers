@@ -1,214 +1,187 @@
+import { getEasyBlockStorageObject, setEasyBlockStorageObject, EasyBlockStorageObject } from './storage';
+import { insertButton } from './content';
 
 /**
- * Process Search Page
- *
- * This is the function that is executed when the browser loads an ebay search page.
- * First, the list of search results is loaded.
- * Then, any items that have previously been hidden are removed from the results.
- * Finally, the hide-item-button is added onto every remaining item in the search result list.
+ * Initializes and processes the storage object for search page.
  */
-export function processSearchPage() {
-    // Get the list of search results from the page elements
-    let ulLists = ["ul.srp-results", "ul#ListViewInner", "ul.b-list__items_nofooter"];
-    let currentList = null;
-    let divSelecter = null;
-    for (let item in ulLists) {
-        if (ulLists.hasOwnProperty(item)) {
-            if ($(ulLists[item]).length) {
-                currentList = $(ulLists[item]);
-                break;
-            }
+export async function processSearchPage() {
+    try {
+        const easyBlockStorageObject = await getEasyBlockStorageObject();
+
+        const searchResultLists = ["ul.srp-results", "ul#ListViewInner", "ul.b-list__items_nofooter", "ul.brwrvr__item-results"];
+        const currentList = searchResultLists.map(item => $(item)).find(list => list.length > 0);
+        if (!currentList) return;
+
+        let divSelector = "li .s-item__wrapper";
+        if (currentList.attr("id") === "ListViewInner") {
+            divSelector = "li.sresult";
+        } else if (currentList.hasClass("brwrvr__item-results brwrvr__item-results--list")) {
+            divSelector = "li .brwrvr__item-card__body .brwrvr__item-card__wrapper";
         }
+
+        hidePreviouslyHiddenItems(currentList[0], divSelector);
+        hidePreviouslyHiddenSellers(currentList[0]);
+
+        const classList = "hide-item-button eh-not-hidden";
+        const items = $(divSelector, currentList[0]);
+        insertButton(30, "Hide item from search results.", classList, items);
+        $($(divSelector, currentList[0])).on("click", ".hide-item-button", hideItem);
+    } catch (error) {
+        console.error('Failed to process search page:', error);
     }
-
-    // If list exists, extract attribute `0` which contains the item list elements.
-    // If list does not exist, just return.
-    if (currentList) {
-        divSelecter = currentList.attr("id") === "ListViewInner" ? "li.sresult" : "li .s-item__wrapper";
-        currentList = currentList[0];
-    } else {
-        return;
-    }
-
-    // Hide any items that have already been previously hidden.
-    if (divSelecter === "li.sresult") {
-        $("li.sresult", currentList).each(function () {
-            let itemNumber: string = $(this).attr("listingid") || "";
-            if (itemNumber !== "" && contentStorageObject.ebay.items.includes(itemNumber)) {
-                $(this).closest("li").remove();
-            }
-        });
-    } else {
-        $("li .s-item__info .s-item__link", currentList).each(function () {
-            let itemNumber: string = getItemNumber($(this).attr("href"));
-            if (itemNumber !== "" && contentStorageObject.ebay.items.includes(itemNumber)) {
-                $(this).closest("li").remove();
-            }
-        });
-    }
-
-    // Hide any sellers that have already been previously hidden or dont meet minimums.
-    $("li .s-item__info .s-item__seller-info-text", currentList).each(function () {
-        let sellerInfoString: string = $(this).text();
-        let sellerInfo = processSellerInfo(sellerInfoString);
-        if (sellerInfo.sellerName !== "" && contentStorageObject.ebay.sellers.includes(sellerInfo.sellerName)) {
-            console.warn("Removing seller: ", sellerInfo);
-            $(this).closest("li").remove();
-        }
-        if (sellerInfo.sellerRating < contentStorageObject.ebay.hideSellersLowerThanReviews) {
-            console.warn("Removing seller with low rating: ", sellerInfo);
-            $(this).closest("li").remove();
-        }
-        if (sellerInfo.sellerReviewCount < contentStorageObject.ebay.hideSellersFewerThanReviews) {
-            console.warn("Removing seller with low review count: ", sellerInfo);
-            $(this).closest("li").remove();
-        }
-    });
-
-    // Insert hide-item-button onto each item in search results
-    let classList = "hide-item-button eh-not-hidden";
-    insertButton(30, "Hide item from search results.", classList, $(divSelecter, currentList));
-    $($(divSelecter, currentList)).on("click", ".hide-item-button", hideItem);
 }
 
+function hidePreviouslyHiddenItems(currentList: HTMLElement, divSelector: string) {
+    getEasyBlockStorageObject().then((easyBlockStorageObject) => {
+        const items = divSelector === "li.sresult" ? $("li.sresult", currentList) : $("li .s-item__info .s-item__link", currentList);
+
+        items.each(function () {
+            const itemNumber = divSelector === "li.sresult" ? $(this).attr("listingid") : getItemNumber($(this).attr("href"));
+            if (itemNumber && easyBlockStorageObject.ebay.items.includes(itemNumber)) {
+                $(this).closest("li").remove();
+            }
+        });
+    });
+}
+
+function hidePreviouslyHiddenSellers(currentList: HTMLElement) {
+    getEasyBlockStorageObject().then((easyBlockStorageObject) => {
+        $("li .s-item__info .s-item__seller-info-text", currentList).each(function () {
+            const sellerInfoString = $(this).text();
+            const sellerInfo = processSellerInfo(sellerInfoString);
+
+            if (sellerInfo.sellerName && easyBlockStorageObject.ebay.sellers.includes(sellerInfo.sellerName)) {
+                $(this).closest("li").remove();
+            }
+
+            if (sellerInfo.sellerRating < easyBlockStorageObject.ebay.hideSellersLowerThanReviews) {
+                $(this).closest("li").remove();
+            }
+
+            if (sellerInfo.sellerReviewCount < easyBlockStorageObject.ebay.hideSellersFewerThanReviews) {
+                $(this).closest("li").remove();
+            }
+        });
+    });
+}
+
+/**
+ * Processes seller information and returns an object containing seller details.
+ */
 function processSellerInfo(sellerInfo: string) {
+    const parts = sellerInfo.split(" ");
     return {
-        sellerName: sellerInfo.split(" ")[0].toLowerCase(),
-        sellerReviewCount: parseInt(sellerInfo.split(" ")[1].replace(/[()]/g, "").replace(/,/g, "")),
-        sellerRating: parseFloat(sellerInfo.split(" ")[2]),
+        sellerName: parts[0].toLowerCase(),
+        sellerReviewCount: parseInt(parts[1].replace(/[()]/g, "").replace(/,/g, "")),
+        sellerRating: parseFloat(parts[2]),
     };
 }
 
 /**
  * Extracts the 12-digit item number from a URL.
- *
- * @param {string} url The URL of the item.
- * @returns {string} The 12-digit item number or an empty string if not found.
  */
-function getItemNumber(url) {
+function getItemNumber(url: string) {
     const itemNumberMatch = url.match(/itm\/(\d{12})/) || url.match(/iid=(\d{12})/);
     return itemNumberMatch && itemNumberMatch[1].length === 12 ? itemNumberMatch[1] : "";
 }
 
 /**
- * Hide Item
- *
- * This function is called when the user clicks a button to hide an item from search results.
- * It gets the item number and name from the elements,
- * adds it to the list of hidden items,
- * and removes the item from the search results page.
- * @this {HTMLElement} The element that was clicked.
+ * Hides item from search results on button click.
  */
 function hideItem() {
-    var itemNumber = "";
-    var itemName = "";
-    if ($(this).parent("li").hasClass("sresult")) {
-        itemNumber = $(this).parent("li.sresult").attr("listingid");
-        itemName = $(this).siblings("h3").first().children("a").first().text();
-    } else {
-        let a = $(this).siblings(".s-item__info").first().children(".s-item__link").first();
-        itemNumber = getItemNumber($(a).attr("href"));
-        itemName = $(this).siblings(".s-item__info").first().children("a").first().children("h3").first().text();
-    }
-    // Add item to list of hidden items
-    if (itemNumber !== "") {
-        if (!contentStorageObject.ebay.items.includes(itemNumber)) {
-            contentStorageObject.ebay.items.push(itemNumber);
+    getEasyBlockStorageObject().then((easyBlockStorageObject) => {
+        let itemNumber = "";
+        const itemName = $(this).siblings(".s-item__info").first().children(".s-item__link").first().children("h3").first().text();
+
+        if ($(this).parent("li").hasClass("sresult")) {
+            itemNumber = $(this).parent("li.sresult").attr("listingid");
+        } else {
+            const a = $(this).siblings(".s-item__info").first().children(".s-item__link").first();
+            itemNumber = getItemNumber($(a).attr("href"));
         }
-        updateStorageList();
-    }
-    $(this).closest("li").remove();
-    console.log("item number " + itemNumber + " was hidden");
-}
 
-/**
- * Process Item Page
- *
- * This is the function that is executed when the browser loads an ebay item page.
- * All it does is find the user id of the seller,
- * and adds a button next to the name,
- * to allow for the seller to be blocked from search results.
- */
-export function processItemPage() {
-    // Extract seller user Id from elements
-    let sellerHref = $(".x-sellercard-atf__info__about-seller a").first()[0].getAttribute("href");
-    let sellerUserId;
-    if (sellerHref.includes("/str/")) {
-        sellerUserId = sellerHref.split("/str/")[1];
-    } else if (sellerHref.includes("/sch/")) {
-        sellerUserId = sellerHref.split("/sch/")[1];
-    } else if (sellerHref.includes("/usr/")) {
-        sellerUserId = sellerHref.split("/usr/")[1];
-    }
-    sellerUserId = sellerUserId.split("?")[0].split("/")[0];
-
-    // Add hide seller button. Modify the div to make the button look good next to the name
-    let userIdHideButtonDiv = document.createElement("div");
-    $(".x-sellercard-atf__info__about-seller a").parent("div").first()[0].appendChild(userIdHideButtonDiv);
-    userIdHideButtonDiv.style.cssText = `position: relative; left: 25px; top: -2px`;
-
-    let classList = `hide-seller-button ${
-        contentStorageObject.ebay.sellers.includes(sellerUserId) ? "eh-is-hidden" : "eh-not-hidden"
-    }`;
-    insertButton(22, "Hide seller's items from search results.", classList, userIdHideButtonDiv);
-    $(userIdHideButtonDiv).on("click", ".hide-seller-button", function () {
-        $(this).toggleClass("eh-is-hidden eh-not-hidden");
-        updateSellerHiddenStatus(sellerUserId);
+        if (itemNumber) {
+            if (!easyBlockStorageObject.ebay.items.includes(itemNumber)) {
+                easyBlockStorageObject.ebay.items.push(itemNumber);
+                setEasyBlockStorageObject(easyBlockStorageObject);
+            }
+            $(this).closest("li").remove();
+            console.log(`Item number ${itemNumber} was hidden`);
+        }
     });
 }
 
 /**
- * Process User Page
- *
- * This is the function that is executed when the browser loads an ebay user page.
- * All it does is find the user id of the seller,
- * and adds a button next to the name,
- * to allow for the seller to be blocked from search results.
+ * Process Item Page
+ * Handles processing of the eBay item page to add the seller hide button.
  */
-export function processUserPage() {
-    // Extract seller user Id from elements
-    let sellerInfoDivs = document.getElementsByClassName("str-seller-card__store-name");
-    if (sellerInfoDivs.length != 1) {
-        console.warn(`Expected 1 user on this user page, but actually found ${sellerInfoDivs.length}:`, sellerInfoDivs);
-        return;
-    }
-    let sellerUserID = sellerInfoDivs[0]
-        .getElementsByTagName("h1")[0]
-        .getElementsByTagName("a")[0]
-        .innerText.toLowerCase();
+export async function processItemPage() {
+    getEasyBlockStorageObject().then((easyBlockStorageObject) => {
+        
+        const sellerHref = $(".x-sellercard-atf__info__about-seller a").first().attr("href");
+        const sellerUserId = extractSellerUserId(sellerHref);
 
-    // Add hide seller button. Modify the div to make the button look good next to the name
-    let userIdHideButtonDiv = document.createElement("div");
-    sellerInfoDivs[0].getElementsByTagName("h1")[0].appendChild(userIdHideButtonDiv);
-    userIdHideButtonDiv.style.cssText = `position: relative; left: 35px; top: 2px`;
+        const userIdHideButtonDiv = document.createElement("div");
+        $(".x-sellercard-atf__info__about-seller a").parent("div").first().append(userIdHideButtonDiv);
+        userIdHideButtonDiv.style.cssText = `position: relative; left: 25px; top: -2px`;
 
-    let classList = `hide-seller-button ${
-        contentStorageObject.ebay.sellers.includes(sellerUserID) ? "eh-is-hidden" : "eh-not-hidden"
-    }`;
-    insertButton(30, "Hide seller's items from search results.", classList, userIdHideButtonDiv);
-    $(userIdHideButtonDiv).on("click", ".hide-seller-button", function () {
-        $(this).toggleClass("eh-is-hidden eh-not-hidden");
-        updateSellerHiddenStatus(sellerUserID);
+        const classList = `hide-seller-button ${easyBlockStorageObject.ebay.sellers.includes(sellerUserId) ? "eh-is-hidden" : "eh-not-hidden"}`;
+        insertButton(22, "Hide seller's items from search results.", classList, userIdHideButtonDiv);
+        $(userIdHideButtonDiv).on("click", ".hide-seller-button", function () {
+            $(this).toggleClass("eh-is-hidden eh-not-hidden");
+            updateSellerHiddenStatus(easyBlockStorageObject, sellerUserId);
+        });
     });
 }
 
 /**
  * Update Seller Hidden Status
- *
- * This function is called when the user clicks a button to hide a seller from search results.
- * It adds the seller user id to the list of hidden sellers.
- * @param {string} sellerUserID The user id of the seller.
- * @this {HTMLElement} The element that was clicked.
+ * Updates the hidden status of a seller based on the user's action.
  */
-function updateSellerHiddenStatus(sellerUserID) {
-    console.log("updating seller status");
-    console.log(sellerUserID);
-    if (contentStorageObject.ebay.sellers.includes(sellerUserID)) {
-        contentStorageObject.ebay.sellers = $.grep(contentStorageObject.ebay.sellers, function (value) {
-            return value != sellerUserID;
-        });
+async function updateSellerHiddenStatus(easyBlockStorageObject: EasyBlockStorageObject, sellerUserID: string) {
+    if (easyBlockStorageObject.ebay.sellers.includes(sellerUserID)) {
+        easyBlockStorageObject.ebay.sellers = easyBlockStorageObject.ebay.sellers.filter(seller => seller !== sellerUserID);
     } else {
-        contentStorageObject.ebay.sellers.push(sellerUserID);
+        easyBlockStorageObject.ebay.sellers.push(sellerUserID);
     }
-    updateStorageList();
+    await setEasyBlockStorageObject(easyBlockStorageObject);
+}
+
+/**
+ * Extracts the seller user ID from the seller's href.
+ */
+function extractSellerUserId(sellerHref: string): string {
+    let sellerUserId = "";
+    const parts = sellerHref.split(/\/(str|usr|sch)\//);
+    if (parts.length > 1) {
+        sellerUserId = parts[2].split("?")[0].split("/")[0];
+    }
+    return sellerUserId;
+}
+
+/**
+ * Process User Page
+ * Handles processing of the eBay user page to add the seller hide button.
+ */
+export async function processUserPage() {
+    getEasyBlockStorageObject().then((easyBlockStorageObject) => {
+        const sellerInfoDivs = document.getElementsByClassName("str-seller-card__store-name");
+        if (sellerInfoDivs.length !== 1) {
+            console.warn(`Expected 1 user on this user page, but actually found ${sellerInfoDivs.length}:`, sellerInfoDivs);
+            return;
+        }
+
+        const sellerUserId = sellerInfoDivs[0].getElementsByTagName("h1")[0].getElementsByTagName("a")[0].innerText.toLowerCase();
+
+        const userIdHideButtonDiv = document.createElement("div");
+        sellerInfoDivs[0].getElementsByTagName("h1")[0].appendChild(userIdHideButtonDiv);
+        userIdHideButtonDiv.style.cssText = `position: relative; left: 35px; top: 2px`;
+
+        const classList = `hide-seller-button ${easyBlockStorageObject.ebay.sellers.includes(sellerUserId) ? "eh-is-hidden" : "eh-not-hidden"}`;
+        insertButton(30, "Hide seller's items from search results.", classList, userIdHideButtonDiv);
+        $(userIdHideButtonDiv).on("click", ".hide-seller-button", function () {
+            $(this).toggleClass("eh-is-hidden eh-not-hidden");
+            updateSellerHiddenStatus(easyBlockStorageObject, sellerUserId);
+        });
+    });
 }

@@ -1,4 +1,4 @@
-import { getEasyBlockStorageObject, setEasyBlockStorageObject, EasyBlockStorageObject } from './storage.js';
+import { getEasyBlockStorageObject, setEasyBlockStorageObject, EasyBlockStorageObject } from './storage';
 
 /**
  * Populate the "for website" header in the popup.

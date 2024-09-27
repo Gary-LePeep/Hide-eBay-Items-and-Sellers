@@ -1,21 +1,21 @@
-# Hide eBay Items and Sellers
+# easyBlock: Hide Items, Sellers, Sponsored, and More
 
-### A browser extension that allows you to hide items and sellers from your eBay search and category results.
+### A browser extension that allows you to hide items and sellers from your search results.
 
-This extension allows you to permanently hide items from appearing in your search results and while browsing the categories on eBay. Simply click the button on the right side of an item and it will remain hidden until you unhide it from the extension popup. You can also hide all items from a specific seller by clicking the button in the "seller information" box on the item page.
+This extension allows you to permanently hide items from appearing in your search results and while browsing the categories on online shopping sites. Simply click the button on the right side of an item and it will remain hidden until you unhide it from the extension popup. You can also hide all items from a specific seller by clicking the button associated with the seller.
 
-Why is this extension helpful? Well currently you can't hide individual items on eBay. You can exclude all items from specific sellers using the filter options but this is not persistent, so you either have to re-enter the filter options every time you start searching eBay or use a saved search. This extension makes it simple and easy by allowing you to hide individual items or all items from a specific seller at the click of a button.
+Why is this extension helpful? Well, currently you can't hide individual items on shopping sites like eBay. You can exclude all items from specific sellers using the filter options, but this is not persistent, so you either have to re-enter the filter options every time you start searching eBay, or use a saved search. This extension makes it simple and easy, by allowing you to hide individual items, or all items from a specific seller, at the click of a button.
 
 ## Features
 
 - Hide items in your search feed instantly with the click of a button.
 - Hide sellers by browsing to the item or their user page. No items from that seller will ever show up in your searches again!
 - Synchronize the list of blocked sellers and items across devices that are using the same browser and account.
+- Setting to hide sellers with low ratings
+- Setting to hide sellers with low review count
 
 ## Future Plans
 
-- Setting to hide sellers with low ratings
-- Setting to hide sellers with low review count
 - Show how many items hidden from the page you're on, and give an option to unhide them for the moment
 - Setting to optionally hide sponsored items
 - Eventually expand to other sites, eg. Amazon, Facebook, BestBuy, Adorama...
@@ -32,7 +32,7 @@ You must have npm installed to transpile the typescript files.
 
 Once you have cloned the repository, run `npm install` to install the dependencies.
 
-When you make any changes, run `npm build`. This command will:
+When you make any changes, run `npm run build`. This command will run the webpack build, which will:
 
 1. Delete the `dist` folder if it exists
 2. Transpile the typescript files to the `dist` folder

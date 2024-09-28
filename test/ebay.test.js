@@ -22,14 +22,15 @@ describe('Test extension', () => {
 
   beforeAll(async () => {
     const extensionPath = path.resolve(__dirname, '../dist');
+    const isCI = process.env.CI === 'true';
 
     browser = await puppeteer.launch({
-      headless: false,
+      headless: isCI,
       args: [
         `--disable-extensions-except=${extensionPath}`,
         `--load-extension=${extensionPath}`
       ],
-      devtools: true
+      devtools: !isCI
     });
 
     page = await browser.newPage();

@@ -1,6 +1,6 @@
 import { getEasyBlockStorageObject, setEasyBlockStorageObject } from './storage';
 import { processSearchPage, processItemPage, processUserPage } from './content-ebay';
-import { ebayPattern, EbayPattern } from './patterns';
+import { ebayPattern } from './patterns';
 
 /**
  * Initializes the storage and processes the webpage.
@@ -27,7 +27,6 @@ function processWebpage() {
 
         if (ebayPattern.base.test(window.location.origin)) {
             easyBlockStorageObject.ebay.base_url = window.location.origin;
-
             if (ebayPattern.searchPage.test(window.location.href)) {
                 processSearchPage();
             } else if (ebayPattern.itemPage.test(window.location.href)) {

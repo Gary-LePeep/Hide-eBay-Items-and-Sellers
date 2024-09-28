@@ -1,8 +1,23 @@
 import puppeteer from "puppeteer"
 import path from 'path';
 
-describe('Test extension on saved HTML', () => {
-  const timeout = 600000;
+async function getItemTitleByIndex(page, index) {
+  return await page.evaluate((itemIndex) => {
+    // Adjust for zero-based indexing
+    const item = document.querySelector(`.b-list__items_nofooter .s-item:nth-child(${itemIndex + 1})`);
+    
+    if (item) {
+      const titleElement = item.querySelector('.s-item__title');
+      return titleElement ? titleElement.innerText : null; // Return the title text or null
+    }
+    
+    return null; // Return null if the item doesn't exist
+  }, index); // Pass index as an argument to the evaluate function
+}
+
+
+describe('Test extension', () => {
+  const timeout = 10000;
   let browser, page;
 
   beforeAll(async () => {
@@ -18,44 +33,31 @@ describe('Test extension on saved HTML', () => {
     });
 
     page = await browser.newPage();
-
-    // Listen for console events and print them
-    page.on('console', msg => {
-      for (let i = 0; i < msg.args().length; ++i) {
-        console.warn(`${i}: ${msg.args()[i]}`);
-      }
-    });
   });
 
-  it('should hide sellers on eBay search page', async () => {
-    // Load the saved eBay search HTML file
-    await page.goto(`https://www.ebay.com/b/Acer-Predator-Helios-300-PC-Notebooks-Laptops/177/bn_97981221')}`);
+  it('should hide item on eBay category page when hide item clicked', async () => {
+    await page.goto(`https://www.ebay.com/b/PC-Laptops-Netbooks/177/bn_317584')}`);
 
-    // Get the number of items before clicking the hide button
+    // Get the number of items before clicking the hide button, and the name of the second item
     const initialItemCount = await page.evaluate(() => {
-      return document.querySelectorAll('.brwrvr__item-card').length; // Count items without nesting
+      return document.querySelectorAll('.b-list__items_nofooter .s-item').length; // Count items without nesting
     });
+    const secondItemTitle = await getItemTitleByIndex(page, 1);
 
     // Click on the first "hide item" button
-    const hideItemButtonSelector = '.hide-item-button'; // Adjust this selector if needed
-    await page.waitForSelector(hideItemButtonSelector); // Wait for the button to be available
-    await page.click(hideItemButtonSelector); // Simulate clicking the button
+    const hideItemButtonSelector = '.hide-item-button';
+    await page.waitForSelector(hideItemButtonSelector);
+    await page.click(hideItemButtonSelector);
 
-    // Check if the first item has been removed
+    // Get the number of items after clicking the hide button, and the name of the first item
     const currentItemCount = await page.evaluate(() => {
-        return document.querySelectorAll('.brwrvr__item-card').length; // Count items after the click
+        return document.querySelectorAll('.b-list__items_nofooter .s-item').length;
     });
+    const firstItemTitle = await getItemTitleByIndex(page, 0);
 
-    // Assert that the number of items has decreased
-    expect(currentItemCount).toBeLessThan(initialItemCount);
-
-    // Optionally, assert that the first item is not present anymore
-    const firstItemRemoved = await page.evaluate(() => {
-        const firstItem = document.querySelector('.brwrvr__item-card'); // Select the first item
-        return !firstItem; // Check if the first item is null (removed)
-    });
-
-    expect(firstItemRemoved).toBe(true);
+    // Assert that the number of items has decreased by 1, and the title of the first item is the same as the previously second item's title
+    expect(currentItemCount).toBe(initialItemCount - 1);
+    expect(secondItemTitle).toBe(firstItemTitle);
   }, timeout);
 
   afterAll(async () => {

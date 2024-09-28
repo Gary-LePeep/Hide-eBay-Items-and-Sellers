@@ -24,10 +24,8 @@
   },
   "contributors": [],
   "scripts": {
-    "clean": "if exist \"dist/\" rd /q /s \"dist\"",
-    "compile": "npx tsc",
-    "copy-assets": "(robocopy ./ dist/ /COPY:DAT /E /XD dist node_modules .git /XF tsconfig.json .git* *.ts *.tsx) ^& IF %ERRORLEVEL% LEQ 1 EXIT 0",
-    "build": "webpack"
+    "build": "webpack",
+    "test": "jest"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -37,6 +35,8 @@
     "@types/jquery": "^3.5.30",
     "babel-loader": "^9.2.1",
     "copy-webpack-plugin": "^12.0.2",
+    "jest": "^29.7.0",
+    "puppeteer": "^23.4.1",
     "ts-loader": "^9.5.1",
     "typescript": "^5.6.2",
     "webpack": "^5.94.0",

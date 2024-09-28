@@ -41,4 +41,4 @@ When you make any changes, run `npm run build`. This command will run the webpac
 Then, load the `dist` folder in your browser as a developer extension.
 
 ## License
-This project is licensed under the Mozilla Public License (MPL) version 2.0
+This project is licensed under a modified version of the GNU General Public License v3.0. See [LICENSE.md](LICENSE.md) for more details.

@@ -32,7 +32,7 @@ You must have npm installed to transpile the typescript files.
 
 Once you have cloned the repository, run `npm install` to install the dependencies.
 
-When you make any changes, run `npm run build`. This command will run the webpack build, which will:
+When you make any changes, run `npm run build-dev`. This command will run the webpack build, which will:
 
 1. Delete the `dist` folder if it exists
 2. Transpile the typescript files to the `dist` folder

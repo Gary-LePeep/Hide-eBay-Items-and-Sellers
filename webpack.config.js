@@ -6,6 +6,9 @@ import CopyWebpackPlugin from 'copy-webpack-plugin';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// For local development
+const isDev = process.env.NODE_ENV === 'development';
+
 export default {
     entry: {
         content: './src/content/content.ts',
@@ -32,7 +35,7 @@ export default {
         clean: true,
         publicPath: '/',
     },
-    watch: true,
+    watch: isDev,
     plugins: [
         new CopyWebpackPlugin({
             patterns: [

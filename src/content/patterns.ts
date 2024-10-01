@@ -1,3 +1,5 @@
+import { testEbayPattern } from "../../test/patterns";
+
 export interface EbayPattern {
     base: RegExp,
     searchPage: RegExp,
@@ -6,8 +8,8 @@ export interface EbayPattern {
 }
 
 export const ebayPattern: EbayPattern = {
-    base: new RegExp("^https:\/\/(.+?\.)?ebay\."),
-    searchPage: new RegExp("^https:\/\/(.+?\.)?ebay\..+?\/(sch|b)\/.+"),
-    itemPage: new RegExp("^https:\/\/(.+?\.)?ebay\..+?\/(itm|p)\/.+"),
-    userPage: new RegExp("^https:\/\/(.+?\.)?ebay\..+?\/(usr|str)\/.+")
+    base: new RegExp(`(^https:\/\/(.+?\.)?ebay\.|${testEbayPattern.base})`),
+    searchPage: new RegExp(`(^https:\/\/(.+?\.)?ebay\..+?\/(sch|b)\/.+|${testEbayPattern.searchPage})`),
+    itemPage: new RegExp(`(^https:\/\/(.+?\.)?ebay\..+?\/(itm|p)\/.+|${testEbayPattern.itemPage})`),
+    userPage: new RegExp(`(^https:\/\/(.+?\.)?ebay\..+?\/(usr|str)\/.+|${testEbayPattern.userPage})`)
 }

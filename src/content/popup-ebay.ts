@@ -117,7 +117,7 @@ export function initializeHideAndUnhideButtons(ebayObject: EasyBlockStorageObjec
     $(".hide-button").on("click", function () {
         const inputGroup = $(this).closest(".input-group");
         const input = inputGroup.children("input").first();
-        const value = input?.val()?.toLowerCase();
+        const value = input?.val()?.toLowerCase().trim();
 
         if (input.hasClass("userid-input")) {
             if (isValidUserID(ebayObject, inputGroup, value)) {

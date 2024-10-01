@@ -1,11 +1,12 @@
 import { getEasyBlockStorageObject, EasyBlockStorageObject } from './storage';
+import { ebayPattern } from './patterns';
 
 /**
  * Initialize the popup.
  */
 $(function () {
     getEasyBlockStorageObject().then((easyBlockStorageObject: EasyBlockStorageObject) => {
-        if (/^https:\/\/(.+?\.)?ebay\./.test(easyBlockStorageObject.webpage)) {
+        if (ebayPattern.base.test(easyBlockStorageObject.webpage)) {
             // Dynamically import the eBay-specific module
             import('./popup-ebay').then(module => {
                 module.populateWebsiteHeader(easyBlockStorageObject.webpage);

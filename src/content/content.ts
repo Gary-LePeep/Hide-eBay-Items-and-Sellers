@@ -2,20 +2,8 @@ import { getEasyBlockStorageObject, setEasyBlockStorageObject } from './storage'
 import { processSearchPage, processItemPage, processUserPage } from './content-ebay';
 import { ebayPattern } from './patterns';
 
-/**
- * Initializes the storage and processes the webpage.
- */
-async function init() {
-    try {
-        const easyBlockStorageObject = await getEasyBlockStorageObject();
-        processWebpage();
-    } catch (error) {
-        console.error('Failed to retrieve easyBlockStorageObject:', error);
-    }
-}
-
 // Initialize the script
-init();
+processWebpage()
 
 /**
  * Processes the webpage based on the current URL.
@@ -28,6 +16,7 @@ function processWebpage() {
         if (ebayPattern.base.test(window.location.origin)) {
             easyBlockStorageObject.ebay.base_url = window.location.origin;
             if (ebayPattern.searchPage.test(window.location.href)) {
+                console.warn("Detected search page. Processing search page...");
                 processSearchPage();
             } else if (ebayPattern.itemPage.test(window.location.href)) {
                 processItemPage();

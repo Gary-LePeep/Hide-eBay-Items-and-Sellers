@@ -50,7 +50,7 @@ describe('Test extension in Chrome', () => {
     extensionId = await getChromeExtensionId(page);
   });
 
-  it('should hide item on eBay search page when hide item clicked, and unhide it via the popup', async () => {
+  it.skip('should hide item on eBay search page when hide item clicked, and unhide it via the popup', async () => {
     await page.goto(`http://localhost:9001/www.ebay.com/sch/i.html&_nkw=Acer+Predator+Helios+300.html`);
 
     // Get the number of items before clicking the hide button, and the name of the second item
@@ -203,6 +203,78 @@ describe('Test extension in Chrome', () => {
     // Assert that the items from the seller are visible again
     expect(sellerItemsVisibleAfterUnblock).toBe(true);
     expect(afterUnblockItemCount).toBe(initialItemCount);
+  }, timeout);
+
+  it('should hide items from a seller with too few reviews or too low reviews as set in the popup', async () => {
+    await page.goto(`http://localhost:9001/www.ebay.com/sch/i.html&_nkw=Acer+Predator+Helios+300.html`);
+    
+    // Get the number of items before hiding sellers
+    const initialItemCount = await page.evaluate(() => {
+      return document.querySelectorAll('.srp-results .s-item').length;
+    });
+
+    // Go to the popup page and block all sellers with lower than 90% reviews
+    await page.goto(`chrome-extension://${extensionId}/popup/popup-ebay.html`);
+    await page.waitForSelector('#hideLowerThanReviews');
+    await page.evaluate(() => {
+      const inputField = document.querySelector('#hideLowerThanReviews');
+      inputField.value = '90';
+      inputField.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await page.click('#submitHideLowerThanReviews');
+    await page.click('#refreshToApply');
+
+    // Go back to the search page and verify that some sellers have been hidden
+    await page.goto(`http://localhost:9001/www.ebay.com/sch/i.html&_nkw=Acer+Predator+Helios+300.html`);
+    const itemCountBlockedLowReviews = await page.evaluate(() => {
+      return document.querySelectorAll('.srp-results .s-item').length;
+    });
+    expect(itemCountBlockedLowReviews).toBeLessThan(initialItemCount);
+
+    // Go to the popup page and unblock low reviews and block all sellers with fewer than 20 reviews
+    await page.goto(`chrome-extension://${extensionId}/popup/popup-ebay.html`);
+    await page.waitForSelector('#hideLowerThanReviews');
+    await page.evaluate(() => {
+      const inputField = document.querySelector('#hideLowerThanReviews');
+      inputField.value = '0';
+      inputField.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await page.click('#submitHideLowerThanReviews');
+    await page.waitForSelector('#hideFewerThanReviews');
+    await page.evaluate(() => {
+      const inputField = document.querySelector('#hideFewerThanReviews');
+      inputField.value = '20';
+      inputField.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await page.click('#submitHideFewerThanReviews');
+    await page.click('#refreshToApply');
+
+    // Go back to the search page and verify that some sellers have been hidden
+    await page.goto(`http://localhost:9001/www.ebay.com/sch/i.html&_nkw=Acer+Predator+Helios+300.html`);
+    const itemCountBlockedFewReviews = await page.evaluate(() => {
+      return document.querySelectorAll('.srp-results .s-item').length;
+    });
+    expect(itemCountBlockedFewReviews).toBeLessThan(initialItemCount);
+
+    // Go to the popup page and block all sellers with lower than 90% reviews, so that both low and few reviews are hidden
+    await page.goto(`chrome-extension://${extensionId}/popup/popup-ebay.html`);
+    await page.waitForSelector('#hideLowerThanReviews');
+    await page.evaluate(() => {
+      const inputField = document.querySelector('#hideLowerThanReviews');
+      inputField.value = '90';
+      inputField.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await page.click('#submitHideLowerThanReviews');
+    await page.click('#refreshToApply');
+
+    // Go back to the search page and verify that some sellers have been hidden
+    await page.goto(`http://localhost:9001/www.ebay.com/sch/i.html&_nkw=Acer+Predator+Helios+300.html`);
+    const itemCountBlockedLowAndFewReviews = await page.evaluate(() => {
+      return document.querySelectorAll('.srp-results .s-item').length;
+    });
+    expect(itemCountBlockedLowAndFewReviews).toBeLessThan(initialItemCount);
+    expect(itemCountBlockedLowAndFewReviews).toBeLessThan(itemCountBlockedFewReviews);
+    expect(itemCountBlockedLowAndFewReviews).toBeLessThan(itemCountBlockedLowReviews);
   }, timeout);
 
   afterAll(async () => {

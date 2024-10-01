@@ -20,6 +20,14 @@ jobs:
 
             - name: Build the project
               run: npm run build
+            
+            - name: Install http-server
+              run: npm install -g http-server
+
+            - name: Start http-server
+              run: |
+                  nohup http-server ./dist -p 9001 > server.log 2>&1 &
+                  sleep 5 # Wait for the server to start
 
             - name: Run tests
               run: npm run test

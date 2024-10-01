@@ -48,8 +48,6 @@ describe('Test extension in Chrome', () => {
     page = await browser.newPage();
 
     extensionId = await getChromeExtensionId(page);
-
-    console.warn(`Extension ID: ${extensionId}`);
   });
 
   it('should hide item on eBay search page when hide item clicked, and unhide it via the popup', async () => {

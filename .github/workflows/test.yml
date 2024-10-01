@@ -26,7 +26,7 @@ jobs:
 
             - name: Start http-server
               run: |
-                  nohup http-server ./dist -p 9001 > server.log 2>&1 &
+                  nohup http-server ./test/saved_pages -p 9001 > server.log 2>&1 &
                   sleep 5 # Wait for the server to start
 
             - name: Run tests

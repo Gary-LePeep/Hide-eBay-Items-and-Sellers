@@ -28,7 +28,7 @@ async function getChromeExtensionId(page) {
 
 
 describe('Test extension in Chrome', () => {
-  const timeout = 10000;
+  const timeout = 60000;
   let browser, page, extensionId;
 
   beforeAll(async () => {

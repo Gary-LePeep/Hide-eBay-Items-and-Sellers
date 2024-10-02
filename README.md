@@ -24,6 +24,8 @@ Why is this extension helpful? Well, currently you can't hide individual items o
 ## Contributing
 Contributions are welcome! If you'd like to contribute to the project, please clone the repository and submit a pull request with your changes.
 
+Special thanks to John Manning, who created the initial version of this project.
+
 ## Support
 If you have any questions or need help, please [open an issue](https://github.com/ebay-hide-items-and-sellers/ebay-hide-items-and-sellers/issues) or send me an email at [my masked email address](mailto:n7bvdoj73@mozmail.com).
 

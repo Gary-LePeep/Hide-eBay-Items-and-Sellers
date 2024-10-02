@@ -50,7 +50,7 @@ describe('Test extension in Chrome', () => {
     extensionId = await getChromeExtensionId(page);
   });
 
-  it.skip('should hide item on eBay search page when hide item clicked, and unhide it via the popup', async () => {
+  it('should hide item on eBay search page when hide item clicked, and unhide it via the popup', async () => {
     await page.goto(`http://localhost:9001/www.ebay.com/sch/i.html&_nkw=Acer+Predator+Helios+300.html`);
 
     // Get the number of items before clicking the hide button, and the name of the second item

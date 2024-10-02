@@ -1,10 +1,12 @@
+import { ebayPattern } from './content/patterns';
+
 /**
  * A map of supported platforms and their corresponding page URL regex patterns and popups.
  */
-const PAGE_REGEX_MAP: { [key: string]: string } = {
-    ebay: '^https://(.+?\\.)?ebay\\.',
-    facebookMarketplace: '^https://(.+?\\.)?facebook\\.',
-    bestbuy: '^https://(.+?\\.)?bestbuy\\.',
+const PAGE_REGEX_MAP: { [key: string]: RegExp } = {
+    ebay: ebayPattern.base,
+    facebookMarketplace: RegExp('^https://(.+?\\.)?facebook\\.'),
+    bestbuy: RegExp('^https://(.+?\\.)?bestbuy\\.'),
     // Add more platforms here
 };
 const PAGE_POPUP_MAP: { [key: string]: string } = {
@@ -22,7 +24,7 @@ function handlePageAction(tabId: number, url: string) {
 
     // Check for matches against the regex patterns
     for (const [key, regex] of Object.entries(PAGE_REGEX_MAP)) {
-        if (new RegExp(regex).test(url)) {
+        if (regex.test(url)) {
             matchedKey = key;
             break;
         }

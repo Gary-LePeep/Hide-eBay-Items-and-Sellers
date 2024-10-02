@@ -1,21 +1,9 @@
 import { getEasyBlockStorageObject, setEasyBlockStorageObject } from './storage';
 import { processSearchPage, processItemPage, processUserPage } from './content-ebay';
-
-/**
- * Initializes the storage and processes the webpage.
- */
-async function init() {
-    try {
-        const easyBlockStorageObject = await getEasyBlockStorageObject();
-        console.warn('content.js retrieved easyBlockStorageObject', JSON.stringify(easyBlockStorageObject));
-        processWebpage();
-    } catch (error) {
-        console.error('Failed to retrieve easyBlockStorageObject:', error);
-    }
-}
+import { ebayPattern } from './patterns';
 
 // Initialize the script
-init();
+processWebpage()
 
 /**
  * Processes the webpage based on the current URL.
@@ -25,14 +13,14 @@ function processWebpage() {
         easyBlockStorageObject.webpage = window.location.origin;
         setEasyBlockStorageObject(easyBlockStorageObject);
 
-        if (/^https:\/\/(.+?\.)?ebay\./.test(window.location.origin)) {
+        if (ebayPattern.base.test(window.location.origin)) {
             easyBlockStorageObject.ebay.base_url = window.location.origin;
-
-            if (/^https:\/\/(.+?\.)?ebay\..+?\/(sch|b)\/.+/.test(window.location.href)) {
+            if (ebayPattern.searchPage.test(window.location.href)) {
+                console.warn("Detected search page. Processing search page...");
                 processSearchPage();
-            } else if (/^https:\/\/(.+?\.)?ebay\..+?\/(itm|p)\/.+/.test(window.location.href)) {
+            } else if (ebayPattern.itemPage.test(window.location.href)) {
                 processItemPage();
-            } else if (/^https:\/\/(.+?\.)?ebay\..+?\/(usr|str)\/.+/.test(window.location.href)) {
+            } else if (ebayPattern.userPage.test(window.location.href)) {
                 processUserPage();
             }
         }

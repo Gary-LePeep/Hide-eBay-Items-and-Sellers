@@ -24,6 +24,8 @@ Why is this extension helpful? Well, currently you can't hide individual items o
 ## Contributing
 Contributions are welcome! If you'd like to contribute to the project, please clone the repository and submit a pull request with your changes.
 
+Special thanks to John Manning, who created the initial version of this project.
+
 ## Support
 If you have any questions or need help, please [open an issue](https://github.com/ebay-hide-items-and-sellers/ebay-hide-items-and-sellers/issues) or send me an email at [my masked email address](mailto:n7bvdoj73@mozmail.com).
 
@@ -32,7 +34,7 @@ You must have npm installed to transpile the typescript files.
 
 Once you have cloned the repository, run `npm install` to install the dependencies.
 
-When you make any changes, run `npm run build`. This command will run the webpack build, which will:
+When you make any changes, run `npm run build-dev`. This command will run the webpack build, which will:
 
 1. Delete the `dist` folder if it exists
 2. Transpile the typescript files to the `dist` folder
@@ -41,4 +43,4 @@ When you make any changes, run `npm run build`. This command will run the webpac
 Then, load the `dist` folder in your browser as a developer extension.
 
 ## License
-This project is licensed under the Mozilla Public License (MPL) version 2.0
+This project is licensed under a modified version of the GNU General Public License v3.0. See [LICENSE.md](LICENSE.md) for more details.

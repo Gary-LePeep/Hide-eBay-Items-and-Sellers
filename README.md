@@ -29,6 +29,11 @@ Special thanks to John Manning, who created the initial version of this project.
 ## Support
 If you have any questions or need help, please [open an issue](https://github.com/ebay-hide-items-and-sellers/ebay-hide-items-and-sellers/issues) or send me an email at [my masked email address](mailto:n7bvdoj73@mozmail.com).
 
+## Known issues
+
+- Ebay filtering by reviews only works in list mode, not gallery mode.
+- Popup loading screen does not auto-update after loading is done. It needs to be closed and reopened.
+
 ## Running locally
 You must have npm installed to transpile the typescript files.
 

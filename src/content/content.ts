@@ -1,6 +1,7 @@
 import { getEasyBlockStorageObject, setEasyBlockStorageObject } from './storage';
-import { processSearchPage, processItemPage, processUserPage } from './content-ebay';
-import { ebayPattern } from './patterns';
+import { processEbaySearchPage, processEbayItemPage, processEbayUserPage } from './content-ebay';
+import { processAmazonSearchPage, processAmazonItemPage } from './content-amazon';
+import { amazonPattern, ebayPattern } from './patterns';
 
 // Initialize the script
 processWebpage()
@@ -16,12 +17,18 @@ function processWebpage() {
         if (ebayPattern.base.test(window.location.origin)) {
             easyBlockStorageObject.ebay.base_url = window.location.origin;
             if (ebayPattern.searchPage.test(window.location.href)) {
-                console.warn("Detected search page. Processing search page...");
-                processSearchPage();
+                processEbaySearchPage();
             } else if (ebayPattern.itemPage.test(window.location.href)) {
-                processItemPage();
+                processEbayItemPage();
             } else if (ebayPattern.userPage.test(window.location.href)) {
-                processUserPage();
+                processEbayUserPage();
+            }
+        } else if (amazonPattern.base.test(window.location.origin)) {
+            easyBlockStorageObject.amazon.base_url = window.location.origin;
+            if (amazonPattern.searchPage.test(window.location.href)) {
+                processAmazonSearchPage();
+            } else if (amazonPattern.itemPage.test(window.location.href)) {
+                processAmazonItemPage();
             }
         }
     });
@@ -42,7 +49,7 @@ export function insertButton(size: number, title: string, classList: string, con
         height: size,
         title: title,
         alt: "Hide",
-        src: chrome.runtime.getURL("icon48.png"),
+        src: chrome.runtime.getURL("icon48.png")
     });
     const $container = contSelector instanceof HTMLElement ? $(contSelector) : contSelector;
     $container.append(input);

@@ -6,10 +6,15 @@ export interface EbayObject {
     hideSellersLowerThanReviews: number;
     base_url: string;
 }
+export interface AmazonObject {
+    items: string[];
+    base_url: string;
+}
 
 export interface EasyBlockStorageObject {
     webpage: string;
     ebay: EbayObject;
+    amazon: AmazonObject;
 }
 
 // A function to get the full easyBlockStorageObject from chrome.storage
@@ -19,8 +24,9 @@ export function getEasyBlockStorageObject(): Promise<EasyBlockStorageObject> {
             if (chrome.runtime.lastError) {
                 return reject(chrome.runtime.lastError);
             }
-            // Provide a default structure if not found in storage
-            const easyBlockStorageObject = result.easyBlockStorageObject || {
+
+            // Default structure
+            const defaultStorageObject = {
                 webpage: "",
                 ebay: {
                     sellers: [],
@@ -29,8 +35,16 @@ export function getEasyBlockStorageObject(): Promise<EasyBlockStorageObject> {
                     hideSellersFewerThanReviews: 0,
                     hideSellersLowerThanReviews: 0,
                     base_url: ""
+                },
+                amazon: {
+                    items: [],
+                    base_url: ""
                 }
             };
+
+            // Merge stored object with defaults to ensure that missing fields are filled in
+            const easyBlockStorageObject = Object.assign({}, defaultStorageObject, result.easyBlockStorageObject);
+
             console.log("easyBlockStorageObject retrieved:", JSON.stringify(easyBlockStorageObject));
             resolve(easyBlockStorageObject);
         });

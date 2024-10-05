@@ -1,5 +1,5 @@
 import { getEasyBlockStorageObject, EasyBlockStorageObject } from './storage';
-import { ebayPattern } from './patterns';
+import { ebayPattern, amazonPattern } from './patterns';
 
 /**
  * Initialize the popup.
@@ -7,7 +7,6 @@ import { ebayPattern } from './patterns';
 $(function () {
     getEasyBlockStorageObject().then((easyBlockStorageObject: EasyBlockStorageObject) => {
         if (ebayPattern.base.test(easyBlockStorageObject.webpage)) {
-            // Dynamically import the eBay-specific module
             import('./popup-ebay').then(module => {
                 module.populateWebsiteHeader(easyBlockStorageObject.webpage);
                 module.populatePopup();
@@ -15,6 +14,12 @@ $(function () {
             }).catch(err => {
                 console.error('Failed to load eBay specific code', err);
             });
+        } else if (amazonPattern.base.test(easyBlockStorageObject.webpage)) {
+            import('./popup-amazon').then(module => {
+                module.populateWebsiteHeader(easyBlockStorageObject.webpage);
+                module.populatePopup();
+                module.initializeHideAndUnhideButtons(easyBlockStorageObject.amazon);
+            })
         }
     }).catch(err => {
         console.error('Failed to retrieve easyBlockStorageObject from storage', err);

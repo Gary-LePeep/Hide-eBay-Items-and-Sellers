@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Ignore example HTML files for language calculation
+test/saved_pages/* linguist-vendored

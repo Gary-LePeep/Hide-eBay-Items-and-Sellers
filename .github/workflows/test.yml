@@ -20,14 +20,16 @@ jobs:
 
             - name: Build the project
               run: npm run build
-            
+
             - name: Install http-server
               run: npm install -g http-server
 
-            - name: Start http-server
+            - name: Start http-servers
               run: |
-                  nohup http-server ./test/saved_pages -p 9001 > server.log 2>&1 &
-                  sleep 5 # Wait for the server to start
+                  for i in {9001..9002}; do
+                    nohup http-server ./test/saved_pages -p $i > server-$i.log 2>&1 &
+                  done
+                  sleep 5 # Wait for the servers to start
 
             - name: Run tests
               run: npm run test

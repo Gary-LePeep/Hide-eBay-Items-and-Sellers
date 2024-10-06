@@ -1,16 +1,18 @@
-import { ebayPattern } from './content/patterns';
+import { ebayPattern, amazonPattern } from './content/patterns';
 
 /**
  * A map of supported platforms and their corresponding page URL regex patterns and popups.
  */
 const PAGE_REGEX_MAP: { [key: string]: RegExp } = {
     ebay: ebayPattern.base,
+    amazon: amazonPattern.base,
     facebookMarketplace: RegExp('^https://(.+?\\.)?facebook\\.'),
     bestbuy: RegExp('^https://(.+?\\.)?bestbuy\\.'),
     // Add more platforms here
 };
 const PAGE_POPUP_MAP: { [key: string]: string } = {
     ebay: 'popup/popup-ebay.html',
+    amazon: 'popup/popup-amazon.html',
     facebookMarketplace: 'popup/popup-facebook.html',
     bestbuy: 'popup/popup-bestbuy.html',
     // Add more platforms here

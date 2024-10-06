@@ -34,7 +34,7 @@
                     <div class="disabled">
                         <input type="checkbox" id="hideSponsoredCheck" disabled>
                         <label for="hideSponsoredCheck"> Hide Sponsored Items</label>
-                        <label class="comingSoonNotice">ⓘ Coming Soon</label>
+                        <label class="warningNotice scootUp">ⓘ Coming Soon</label>
                     </div>
                     <label>Hide sellers with:</label>
                     <div class="row">
@@ -59,6 +59,11 @@
                             <button class="btn btn-outline-danger" type="button" id="submitHideLowerThanReviews">
                                 <span>OK</span>
                             </button>
+                        </div>
+                        <div class="container d-none">
+                            <div class="alert alert-danger mt-1" role="alert">
+                                <label class="warningNotice">Hiding by seller information is not possible when the webpage is displayed as a gallery.<br>Clicking on "Refresh To Apply" will also change the page to be displayed as a list.</label>
+                            </div>
                         </div>
                     </div>
                     <br>

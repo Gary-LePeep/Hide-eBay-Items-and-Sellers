@@ -4,10 +4,8 @@ import { insertButton } from './content';
 /**
  * Initializes and processes the storage object for search page.
  */
-export async function processSearchPage() {
+export async function processEbaySearchPage() {
     try {
-        const easyBlockStorageObject = await getEasyBlockStorageObject();
-
         const searchResultLists = ["ul.srp-results", "ul#ListViewInner", "ul.b-list__items_nofooter", "ul.brwrvr__item-results"];
         const currentList = searchResultLists.map(item => $(item)).find(list => list.length > 0);
         if (!currentList) return;
@@ -91,7 +89,6 @@ function getItemNumber(url: string) {
 function hideItem() {
     getEasyBlockStorageObject().then((easyBlockStorageObject) => {
         let itemNumber = "";
-        const itemName = $(this).siblings(".s-item__info").first().children(".s-item__link").first().children("h3").first().text();
 
         if ($(this).parent("li").hasClass("sresult")) {
             itemNumber = $(this).parent("li.sresult").attr("listingid");
@@ -115,7 +112,7 @@ function hideItem() {
  * Process Item Page
  * Handles processing of the eBay item page to add the seller hide button.
  */
-export async function processItemPage() {
+export async function processEbayItemPage() {
     getEasyBlockStorageObject().then((easyBlockStorageObject) => {
         
         const sellerHref = $(".x-sellercard-atf__info__about-seller a").first().attr("href");
@@ -163,7 +160,7 @@ function extractSellerUserId(sellerHref: string): string {
  * Process User Page
  * Handles processing of the eBay user page to add the seller hide button.
  */
-export async function processUserPage() {
+export async function processEbayUserPage() {
     getEasyBlockStorageObject().then((easyBlockStorageObject) => {
         const sellerInfoDivs = document.getElementsByClassName("str-seller-card__store-name");
         if (sellerInfoDivs.length !== 1) {

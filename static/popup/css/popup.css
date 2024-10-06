@@ -127,7 +127,7 @@ input[type="text"] {
     display: none;
 }
 
-.comingSoonNotice {
+.warningNotice {
     position: relative;
     font-style: italic;
     color: #a11111;
@@ -136,6 +136,11 @@ input[type="text"] {
     padding-top:0;
     padding-bottom:0;
     height: 0px;
+    align-items: center;
+    white-space: wrap;
+}
+
+.scootUp {
     top: -8px;
 }
 

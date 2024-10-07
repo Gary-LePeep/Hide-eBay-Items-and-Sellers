@@ -28,7 +28,7 @@ jobs:
 
       - name: Generate .xpi file
         run: |
-          web-ext build --source-dir=./dist --artifacts-dir=./artifacts --extension-name=easyBlock-${{ github.event.release.tag_name }}.xpi
+          web-ext build --source-dir=./dist --artifacts-dir=./artifacts --filename=easyBlock-${{ github.event.release.tag_name }}.xpi
 
       - name: List artifacts
         run: ls -la ./artifacts

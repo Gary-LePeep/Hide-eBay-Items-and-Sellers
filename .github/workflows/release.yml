@@ -29,7 +29,6 @@ jobs:
       - name: Generate .xpi file
         run: |
           web-ext build --source-dir=./dist --artifacts-dir=./artifacts
-        working-directory: ./dist
 
       - name: Upload .xpi to Release
         uses: actions/upload-release-asset@v1

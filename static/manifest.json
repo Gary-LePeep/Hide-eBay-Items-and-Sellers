@@ -71,6 +71,8 @@
   ],
   "browser_specific_settings": {
     "gecko": {
+      "id": "dev.gary-lepeep.easyblock",
+      "strict_min_version": "109.0"
     }
   }
 }

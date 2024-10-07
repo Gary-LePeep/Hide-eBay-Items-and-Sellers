@@ -2,4 +2,4 @@
 * text=auto
 
 # Ignore example HTML files for language calculation
-test/saved_pages/* linguist-vendored
+test/saved_pages/**/* linguist-vendored

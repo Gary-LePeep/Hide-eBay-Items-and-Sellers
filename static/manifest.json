@@ -66,8 +66,7 @@
     "https://*.ebay.com.sg/*",
     "https://*.ebay.es/*",
     "https://*.ebay.ch/*",
-    "https://*.ebay.co.uk/*",
-    "https://*.amazon.com/*"
+    "https://*.ebay.co.uk/*"
   ],
   "browser_specific_settings": {
     "gecko": {

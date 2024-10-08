@@ -47,5 +47,9 @@ When you make any changes, run `npm run build-dev`. This command will run the we
 
 Then, load the `dist` folder in your browser as a developer extension.
 
+## Privacy Policy
+
+This extension does not collect or transmit any personally identifiable information. See [PRIVACY.md](PRIVACY.md) for more details.
+
 ## License
 This project is licensed under a modified version of the GNU General Public License v3.0. See [LICENSE.md](LICENSE.md) for more details.

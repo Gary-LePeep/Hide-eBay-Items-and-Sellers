@@ -47,7 +47,7 @@
       "matches": ["*://*/*"]
     }
   ],
-  "permissions": ["storage", "tabs", "declarativeContent", "activeTab", "scripting", "page_action"],
+  "permissions": ["storage", "tabs", "activeTab", "scripting", "page_action"],
   "browser_specific_settings": {
     "gecko": {
       "id": "{78328bdc-5edb-480c-8ea8-0160a565c372}",

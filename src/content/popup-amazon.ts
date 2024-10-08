@@ -68,15 +68,17 @@ export function initializeHideAndUnhideButtons(amazonObject: EasyBlockStorageObj
         }
     });
 
-    $(".hide-button").on("click", function () {
+    $(".hide-button").on("click", async function () {
+        const easyBlockStorageObject: EasyBlockStorageObject = await getEasyBlockStorageObject();
         const inputGroup = $(this).closest(".input-group");
         const input = inputGroup.children("input").first();
         const value = input?.val()?.toLowerCase().trim();
 
-        if (isValidASIN(amazonObject, inputGroup, value)) {
-            completeListUpdate(amazonObject, ".item-list-group", value);
+        if (isValidASIN(easyBlockStorageObject.amazon, inputGroup, value)) {
+            completeListUpdate(easyBlockStorageObject.amazon, ".item-list-group", value);
             input.val("");
         }
+        await setEasyBlockStorageObject(easyBlockStorageObject);
     });
 }
 

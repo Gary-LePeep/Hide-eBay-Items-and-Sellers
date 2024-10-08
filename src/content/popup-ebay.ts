@@ -114,22 +114,24 @@ export function initializeHideAndUnhideButtons(ebayObject: EasyBlockStorageObjec
         }
     });
 
-    $(".hide-button").on("click", function () {
+    $(".hide-button").on("click", async function () {
         const inputGroup = $(this).closest(".input-group");
         const input = inputGroup.children("input").first();
         const value = input?.val()?.toLowerCase().trim();
 
+        const easyBlockStorageObject: EasyBlockStorageObject = await getEasyBlockStorageObject();
         if (input.hasClass("userid-input")) {
-            if (isValidUserID(ebayObject, inputGroup, value)) {
-                completeListUpdate(ebayObject, ".seller-list-group", value);
+            if (isValidUserID(easyBlockStorageObject.ebay, inputGroup, value)) {
+                completeListUpdate(easyBlockStorageObject.ebay, ".seller-list-group", value);
                 input.val("");
             }
         } else {
-            if (isValidItemNumber(ebayObject, inputGroup, value)) {
-                completeListUpdate(ebayObject, ".item-list-group", value);
+            if (isValidItemNumber(easyBlockStorageObject.ebay, inputGroup, value)) {
+                completeListUpdate(easyBlockStorageObject.ebay, ".item-list-group", value);
                 input.val("");
             }
         }
+        await setEasyBlockStorageObject(easyBlockStorageObject);
     });
 }
 

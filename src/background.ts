@@ -1,4 +1,5 @@
 import { ebayPattern, amazonPattern } from './content/patterns';
+import {getEasyBlockStorageObject} from "./content/storage";
 
 /**
  * A map of supported platforms and their corresponding page URL regex patterns and popups.
@@ -6,14 +7,14 @@ import { ebayPattern, amazonPattern } from './content/patterns';
 const PAGE_REGEX_MAP: { [key: string]: RegExp } = {
     ebay: ebayPattern.base,
     amazon: amazonPattern.base,
-    facebookMarketplace: RegExp('^https://(.+?\\.)?facebook\\.'),
+    facebook: RegExp('^https://(.+?\\.)?facebook\\.'),
     bestbuy: RegExp('^https://(.+?\\.)?bestbuy\\.'),
     // Add more platforms here
 };
 const PAGE_POPUP_MAP: { [key: string]: string } = {
     ebay: 'popup/popup-ebay.html',
     amazon: 'popup/popup-amazon.html',
-    facebookMarketplace: 'popup/popup-facebook.html',
+    facebook: 'popup/popup-facebook.html',
     bestbuy: 'popup/popup-bestbuy.html',
     // Add more platforms here
 };
@@ -21,7 +22,8 @@ const PAGE_POPUP_MAP: { [key: string]: string } = {
 /**
  * Handles page action visibility and sets the appropriate popup for all browsers.
  */
-function handlePageAction(tabId: number, url: string) {
+async function handlePageAction(tabId: number, url: string) {
+    const storageObject = await getEasyBlockStorageObject();
     let matchedKey: string | undefined;
 
     // Check for matches against the regex patterns
@@ -35,15 +37,23 @@ function handlePageAction(tabId: number, url: string) {
     // Always enable the extension icon.
     // If the website is one of the supported sites, show the proper popup and enable page action (only relevant for firefox).
     // Otherwise, show the default popup and disable page action (only relevant for firefox).
-    chrome.action.enable(tabId);
+    await chrome.action.enable(tabId);
     if (matchedKey) {
-        chrome.action.setPopup({ tabId, popup: PAGE_POPUP_MAP[matchedKey] });
-        if (navigator.userAgent.search("Firefox") > 0) {
-            chrome.pageAction.show(tabId);
-            chrome.pageAction.setPopup({ tabId, popup: PAGE_POPUP_MAP[matchedKey] });
+        if (storageObject[matchedKey].disabled) {
+            await chrome.action.setPopup({tabId, popup: 'popup/popup-disabled.html'});
+            if (navigator.userAgent.search("Firefox") > 0) {
+                chrome.pageAction.hide(tabId);
+                chrome.pageAction.setPopup({ tabId, popup: 'popup/popup-disabled.html' });
+            }
+        } else {
+            await chrome.action.setPopup({tabId, popup: PAGE_POPUP_MAP[matchedKey]});
+            if (navigator.userAgent.search("Firefox") > 0) {
+                chrome.pageAction.show(tabId);
+                chrome.pageAction.setPopup({tabId, popup: PAGE_POPUP_MAP[matchedKey]});
+            }
         }
     } else {
-        chrome.action.setPopup({ tabId, popup: 'popup/popup-default.html' });
+        await chrome.action.setPopup({tabId, popup: 'popup/popup-default.html'});
         if (navigator.userAgent.search("Firefox") > 0) {
             chrome.pageAction.hide(tabId);
             chrome.pageAction.setPopup({ tabId, popup: 'popup/popup-default.html' });

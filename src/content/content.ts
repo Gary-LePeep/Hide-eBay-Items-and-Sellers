@@ -16,6 +16,9 @@ function processWebpage() {
 
         if (ebayPattern.base.test(window.location.origin)) {
             easyBlockStorageObject.ebay.base_url = window.location.origin;
+            if (easyBlockStorageObject.ebay.disabled) {
+                return;
+            }
             if (ebayPattern.searchPage.test(window.location.href)) {
                 processEbaySearchPage();
             } else if (ebayPattern.itemPage.test(window.location.href)) {
@@ -25,6 +28,9 @@ function processWebpage() {
             }
         } else if (amazonPattern.base.test(window.location.origin)) {
             easyBlockStorageObject.amazon.base_url = window.location.origin;
+            if (easyBlockStorageObject.amazon.disabled) {
+                return;
+            }
             if (amazonPattern.searchPage.test(window.location.href)) {
                 processAmazonSearchPage();
             } else if (amazonPattern.itemPage.test(window.location.href)) {

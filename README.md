@@ -2,7 +2,7 @@
 
 ### A browser extension that allows you to hide items and sellers from your search results.
 
-This extension allows you to permanently hide items from appearing in your search results and while browsing the categories on online shopping sites. Simply click the button on the right side of an item and it will remain hidden until you unhide it from the extension popup. You can also hide all items from a specific seller by clicking the button associated with the seller.
+This extension allows you to permanently hide items from appearing in your search results and while browsing the categories on online shopping sites. Simply click the button on the right side of an item, and it will remain hidden until you unhide it from the extension popup. You can also hide all items from a specific seller by clicking the button associated with the seller.
 
 Why is this extension helpful? Well, currently you can't hide individual items on shopping sites like eBay. You can exclude all items from specific sellers using the filter options, but this is not persistent, so you either have to re-enter the filter options every time you start searching eBay, or use a saved search. This extension makes it simple and easy, by allowing you to hide individual items, or all items from a specific seller, at the click of a button.
 
@@ -18,8 +18,9 @@ Why is this extension helpful? Well, currently you can't hide individual items o
 
 - Show how many items hidden from the page you're on, and give an option to unhide them for the moment
 - Setting to optionally hide sponsored items
-- Eventually expand to other sites, eg. Amazon, Facebook, BestBuy, Adorama...
-- Eventually expand to other browsers, eg. Edge, Safari...
+- Eventually expand to other sites:
+  - Facebook, BestBuy, Adorama, Google Shopping, Aliexpress, 
+- Eventually expand to other browsers, e.g. Edge, Safari...
 
 ## Contributing
 Contributions are welcome! If you'd like to contribute to the project, please clone the repository and submit a pull request with your changes.
@@ -27,7 +28,7 @@ Contributions are welcome! If you'd like to contribute to the project, please cl
 Special thanks to John Manning, who created the initial version of this project.
 
 ## Support
-If you have any questions or need help, please [open an issue](https://github.com/ebay-hide-items-and-sellers/ebay-hide-items-and-sellers/issues) or send me an email at [my masked email address](mailto:n7bvdoj73@mozmail.com).
+If you have any questions or need help, please [open an issue](https://github.com/ebay-hide-items-and-sellers/ebay-hide-items-and-sellers/issues) or email me at [my masked email address](mailto:n7bvdoj73@mozmail.com).
 
 ## Known issues
 

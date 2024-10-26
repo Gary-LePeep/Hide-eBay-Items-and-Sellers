@@ -18,13 +18,49 @@
     </div>
     <nav>
         <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
-            <a class="nav-item nav-link active" id="nav-items-tab" data-toggle="tab" href="#nav-items" role="tab"
-                aria-controls="nav-home" aria-selected="true">Items</a>
+            <a class="nav-item nav-link active" id="nav-settings-tab" data-toggle="tab" href="#nav-settings" role="tab"
+                aria-controls="nav-home" aria-selected="true">Settings</a>
+            <a class="nav-item nav-link" id="nav-items-tab" data-toggle="tab" href="#nav-items" role="tab"
+                aria-controls="nav-profile" aria-selected="false">Items</a>
         </div>
     </nav>
     <div class="container">
         <div class="tab-content" id="nav-tabContent">
-            <div class="tab-pane fade show active" id="nav-items" role="tabpanel" aria-labelledby="nav-items-tab">
+            <div class="tab-pane fade show active" id="nav-settings" role="tabpanel" aria-labelledby="nav-settings-tab">
+                <div class="container">
+                    <button class="btn btn-outline-danger" type="button" id="disableForSite">
+                        <span>Disable for this site</span>
+                    </button>
+                    <br>
+                    <br>
+                    <button class="btn btn-outline-danger d-none" type="button" id="refreshToApply">
+                        <span>Refresh To Apply</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="nav-sellers" role="tabpanel" aria-labelledby="nav-sellers-tab">
+                <div class="container">
+                    <!-- <h3>Hidden Sellers</h3> -->
+                    <ul class="list-group list-group-flush seller-list-group">
+                        <li class="list-group-item align-items-center default-list-item">No Sellers Hidden...</li>
+                    </ul>
+                    <br>
+                    <p>All items from sellers in this list will not appear when searching eBay.</p>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control userid-input" placeholder="Seller's user ID"
+                            aria-label="Seller's user ID" aria-describedby="basic-addon2">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-danger hide-button" type="button">
+                                <span>Hide Seller</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="invalid-feedback">Please provide a valid eBay seller user ID.</div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="nav-items" role="tabpanel" aria-labelledby="nav-items-tab">
                 <div class="container">
                     <ul class="list-group list-group-flush item-list-group">
                         <li class="list-group-item align-items-center default-list-item">No Items Hidden...</li>

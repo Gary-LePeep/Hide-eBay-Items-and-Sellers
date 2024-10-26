@@ -1,4 +1,4 @@
-import { getEasyBlockStorageObject, setEasyBlockStorageObject, EasyBlockStorageObject } from './storage';
+import { getEasyBlockStorageObject, setEasyBlockStorageObject } from './storage';
 import { insertButton } from './content';
 
 /**

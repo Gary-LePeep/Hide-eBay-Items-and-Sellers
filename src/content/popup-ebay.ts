@@ -68,14 +68,6 @@ export async function populatePopup() {
         await setEasyBlockStorageObject(updatedEasyBlockStorageObject);
         $("#refreshToApply").removeClass("d-none");
     });
-
-    document.getElementById("refreshToApply")?.addEventListener("click", () => {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (tabs[0].id) {
-                chrome.tabs.reload(tabs[0].id);
-            }
-        });
-    });
 }
 
 

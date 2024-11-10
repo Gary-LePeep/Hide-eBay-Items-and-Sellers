@@ -13,10 +13,19 @@ export interface AmazonObject {
     disabled: boolean;
 }
 
+export interface GoogleObject {
+    sellers: string[];
+    whitelist: boolean;
+    items: string[];
+    base_url: string;
+    disabled: boolean;
+}
+
 export interface EasyBlockStorageObject {
     webpage: string;
     ebay: EbayObject;
     amazon: AmazonObject;
+    google: GoogleObject;
 }
 
 
@@ -57,6 +66,13 @@ export function getEasyBlockStorageObject(): Promise<EasyBlockStorageObject> {
                     disabled: false
                 },
                 amazon: {
+                    items: [],
+                    base_url: "",
+                    disabled: false
+                },
+                google: {
+                    sellers: [],
+                    whitelist: false,
                     items: [],
                     base_url: "",
                     disabled: false

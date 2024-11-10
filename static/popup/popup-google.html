@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <title>Ebay Popup</title>
+    <title>Google Popup</title>
 
     <link rel="stylesheet" href="./css/bootstrap.min.css">
     <link rel="stylesheet" href="./css/popup.css">
@@ -14,14 +14,14 @@
 <body>
     <div class="header">
         <h3>easyBlock</h3>
-        <h5 id="forWebsite" value="for website">for website</h5>
+        <h5 id="forSeller" value="for website">for website</h5>
     </div>
     <nav>
         <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
             <a class="nav-item nav-link active" id="nav-settings-tab" data-toggle="tab" href="#nav-settings" role="tab"
                 aria-controls="nav-home" aria-selected="true">Settings</a>
             <a class="nav-item nav-link" id="nav-sellers-tab" data-toggle="tab" href="#nav-sellers" role="tab"
-                aria-controls="nav-profile" aria-selected="false">Sellers</a>
+                aria-controls="nav-profile" aria-selected="false">Websites</a>
             <a class="nav-item nav-link" id="nav-items-tab" data-toggle="tab" href="#nav-items" role="tab"
                 aria-controls="nav-profile" aria-selected="false">Items</a>
         </div>
@@ -30,42 +30,6 @@
         <div class="tab-content" id="nav-tabContent">
             <div class="tab-pane fade show active" id="nav-settings" role="tabpanel" aria-labelledby="nav-settings-tab">
                 <div class="container">
-                    <br>
-                    <div class="disabled">
-                        <input type="checkbox" id="hideSponsoredCheck" disabled>
-                        <label for="hideSponsoredCheck"> Hide Sponsored Items</label>
-                        <label class="warningNotice scootUp">ⓘ Coming Soon</label>
-                    </div>
-                    <label>Hide sellers with:</label>
-                    <div class="row">
-                        <div class="left">
-                            <label for="hideFewerThanReviews">Fewer than</label>
-                            <input type="text" id="hideFewerThanReviews" size="1" value="0">
-                            <label for="hideFewerThanReviews">reviews</label>
-                        </div>
-                        <div class="right">
-                            <button class="btn btn-outline-danger" type="button" id="submitHideFewerThanReviews">
-                                <span>OK</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="left">
-                            <label for="hideLowerThanReviews">Reviews below</label>
-                            <input type="text" id="hideLowerThanReviews" size="1" value="0">
-                            <label for="hideLowerThanReviews">%</label>
-                        </div>
-                        <div class="right">
-                            <button class="btn btn-outline-danger" type="button" id="submitHideLowerThanReviews">
-                                <span>OK</span>
-                            </button>
-                        </div>
-                        <div class="container d-none">
-                            <div class="alert alert-danger mt-1" role="alert">
-                                <label class="warningNotice">Hiding by seller information is not possible when the webpage is displayed as a gallery.<br>Clicking on "Refresh To Apply" will also change the page to be displayed as a list.</label>
-                            </div>
-                        </div>
-                    </div>
                     <button class="btn btn-outline-danger" type="button" id="disableForSite">
                         <span>Disable for this site</span>
                     </button>
@@ -79,43 +43,41 @@
 
             <div class="tab-pane fade" id="nav-sellers" role="tabpanel" aria-labelledby="nav-sellers-tab">
                 <div class="container">
-                    <!-- <h3>Hidden Sellers</h3> -->
                     <ul class="list-group list-group-flush seller-list-group">
-                        <li class="list-group-item align-items-center default-list-item">No Sellers Hidden...</li>
+                        <li class="list-group-item align-items-center default-list-item">No Websites Hidden...</li>
                     </ul>
                     <br>
-                    <p>All items from sellers in this list will not appear when searching eBay.</p>
+                    <p>All items from websites in this list will not appear when searching Google Shopping.</p>
                     <div class="input-group mb-3">
-                        <input type="text" class="form-control userid-input" placeholder="Seller's user ID"
-                            aria-label="Seller's user ID" aria-describedby="basic-addon2">
+                        <input type="text" class="form-control userid-input" placeholder="Website URL"
+                            aria-label="Website URL" aria-describedby="basic-addon2">
                         <div class="input-group-append">
                             <button class="btn btn-outline-danger hide-button" type="button">
-                                <span>Hide Seller</span>
+                                <span>Add Website</span>
                             </button>
                         </div>
                     </div>
-                    <div class="invalid-feedback">Please provide a valid eBay seller user ID.</div>
+                    <div class="invalid-feedback">Please provide a valid Google Shopping website.</div>
                 </div>
             </div>
 
             <div class="tab-pane fade" id="nav-items" role="tabpanel" aria-labelledby="nav-items-tab">
                 <div class="container">
-                    <!-- <h3>Hidden Items</h3> -->
                     <ul class="list-group list-group-flush item-list-group">
                         <li class="list-group-item align-items-center default-list-item">No Items Hidden...</li>
                     </ul>
                     <br>
-                    <p>Items in this list will not appear when searching eBay.</p>
+                    <p>Items in this list will not appear when searching Google Shopping.</p>
                     <div class="input-group mb-3">
                         <input type="text" class="form-control item-number-input" placeholder="Item number"
-                            aria-label="eBay item number" aria-describedby="basic-addon2">
+                            aria-label="Google Shopping item number" aria-describedby="basic-addon2">
                         <div class="input-group-append">
                             <button class="btn btn-outline-danger hide-button" type="button">
                                 <span>Hide Item</span>
                             </button>
                         </div>
                     </div>
-                    <div class="invalid-feedback">Please provide a valid eBay item number.</div>
+                    <div class="invalid-feedback">Please provide a valid Google Shopping item number.</div>
                 </div>
             </div>
         </div>

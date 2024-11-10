@@ -1,4 +1,4 @@
-import { ebayPattern, amazonPattern } from './content/patterns';
+import { ebayPattern, amazonPattern, googlePattern } from './content/patterns';
 import {getEasyBlockStorageObject} from "./content/storage";
 
 /**
@@ -7,6 +7,7 @@ import {getEasyBlockStorageObject} from "./content/storage";
 const PAGE_REGEX_MAP: { [key: string]: RegExp } = {
     ebay: ebayPattern.base,
     amazon: amazonPattern.base,
+    google: googlePattern.base,
     facebook: RegExp('^https://(.+?\\.)?facebook\\.'),
     bestbuy: RegExp('^https://(.+?\\.)?bestbuy\\.'),
     // Add more platforms here
@@ -14,6 +15,7 @@ const PAGE_REGEX_MAP: { [key: string]: RegExp } = {
 const PAGE_POPUP_MAP: { [key: string]: string } = {
     ebay: 'popup/popup-ebay.html',
     amazon: 'popup/popup-amazon.html',
+    google: 'popup/popup-google.html',
     facebook: 'popup/popup-facebook.html',
     bestbuy: 'popup/popup-bestbuy.html',
     // Add more platforms here

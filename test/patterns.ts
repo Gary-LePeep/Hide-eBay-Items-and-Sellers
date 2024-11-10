@@ -10,3 +10,8 @@ export const testAmazonPattern = {
     searchPage: "localhost:9002/.+amazon.+/s",
     itemPage: "localhost:9002/.+amazon.+/dp/"
 }
+
+export const testGooglePattern = {
+    base: "localhost:9003",
+    searchPage: "localhost:9003/.+google.+/.+[?|&]udm=28.*"
+}

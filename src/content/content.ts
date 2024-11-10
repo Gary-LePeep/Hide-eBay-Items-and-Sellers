@@ -1,7 +1,8 @@
 import { getEasyBlockStorageObject, setEasyBlockStorageObject } from './storage';
 import { processEbaySearchPage, processEbayItemPage, processEbayUserPage } from './content-ebay';
 import { processAmazonSearchPage, processAmazonItemPage } from './content-amazon';
-import { amazonPattern, ebayPattern } from './patterns';
+import { amazonPattern, ebayPattern, googlePattern } from './patterns';
+import {processGoogleSearchPage} from "./content-google";
 
 // Initialize the script
 processWebpage()
@@ -35,6 +36,14 @@ function processWebpage() {
                 processAmazonSearchPage();
             } else if (amazonPattern.itemPage.test(window.location.href)) {
                 processAmazonItemPage();
+            }
+        } else if (googlePattern.base.test(window.location.origin)) {
+            easyBlockStorageObject.google.base_url = window.location.origin;
+            if (easyBlockStorageObject.google.disabled) {
+                return;
+            }
+            if (googlePattern.searchPage.test(window.location.href)) {
+                processGoogleSearchPage();
             }
         }
     });

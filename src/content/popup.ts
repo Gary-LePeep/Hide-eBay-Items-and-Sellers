@@ -1,5 +1,5 @@
 import {getEasyBlockStorageObject, EasyBlockStorageObject, setEasyBlockStorageObject} from './storage';
-import { ebayPattern, amazonPattern } from './patterns';
+import {ebayPattern, amazonPattern, googlePattern} from './patterns';
 
 /**
  * Initialize the popup.
@@ -24,6 +24,15 @@ $(function () {
                     module.populateWebsiteHeader(easyBlockStorageObject.webpage);
                     module.populatePopup();
                     module.initializeHideAndUnhideButtons(easyBlockStorageObject.amazon);
+                });
+            }
+        } else if (googlePattern.base.test(easyBlockStorageObject.webpage)) {
+            websiteStorageObject = easyBlockStorageObject.google;
+            if (!websiteStorageObject.disabled) {
+                import('./popup-google').then(module => {
+                    module.populateWebsiteHeader(easyBlockStorageObject.webpage);
+                    module.populatePopup();
+                    module.initializeHideAndUnhideButtons(easyBlockStorageObject.google);
                 });
             }
         }

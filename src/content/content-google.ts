@@ -5,33 +5,60 @@ import { insertButton } from './content';
  * Initializes and processes the storage object for search page.
  */
 export async function processGoogleSearchPage() {
+    hidePreviouslyHiddenItems()
+
     const targetSelector = "div > div > div > div > h2";
-    let classList = "hide-item-button ";
+    let currentTarget = null;
 
     const observer = new MutationObserver(async () => {
         const targetElement = $(targetSelector);
 
-        if (targetElement.length > 0 && targetElement.find(`.${classList}`).length === 0) {
+        // Check if the target element is different
+        if (targetElement[0] !== currentTarget) {
+            currentTarget = targetElement[0];
+            let classList = "hide-item-button";
+
+            // Check if the button already exists as a sibling; if so, return early
+            if (targetElement.siblings("div").find(`.${classList}`).length > 0) {
+                return;
+            }
+
+            // Temporarily disconnect the observer to avoid duplicates
+            observer.disconnect();
+
+            // Get the closest ancestor's data-mltuid attribute
             let mltuid = targetElement.closest('[data-mltuid]').attr("data-mltuid");
-            classList += await getEasyBlockStorageObject().then((easyBlockStorageObject) => {
-                if (easyBlockStorageObject.google.items.includes(mltuid)) {
-                    return "eh-is-hidden";
-                } else {
-                    return "eh-not-hidden";
-                }
-            })
+
+            // Add button within a container
             const buttonContainer = document.createElement("div");
             buttonContainer.style.cssText = "position: relative; left: 12px; top: 12px;";
-
+            classList += await getEasyBlockStorageObject().then((easyBlockStorageObject) => {
+                return easyBlockStorageObject.google.items.includes(mltuid)
+                    ? " eh-is-hidden"
+                    : " eh-not-hidden";
+            });
             insertButton(30, "Hide item from search results.", classList, $(buttonContainer));
 
             targetElement.parent().append(buttonContainer);
             $(buttonContainer).on("click", ".hide-item-button", hideItem);
-            observer.disconnect();
+
+            // Re-enable the observer after button addition
+            observer.observe(document.body, { childList: true, subtree: true });
         }
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
+}
+
+function hidePreviouslyHiddenItems() {
+    getEasyBlockStorageObject().then((easyBlockStorageObject) => {
+        for (const mltuid of easyBlockStorageObject.google.items) {
+            const itemToHide = $(`div[data-oid="${mltuid}"]`);
+            if (itemToHide.length > 0) {
+                itemToHide.css("display", "none");
+            }
+        }
+    });
 }
 
 
@@ -82,7 +109,16 @@ function hideItem() {
             }
             $(this).removeClass("eh-not-hidden");
             $(this).addClass("eh-is-hidden");
-            console.log(`Item number ${mltuid} was hidden`);
+            console.log(`Item number ${mltuid} was added to the hide list`);
+
+            // Find the div with the matching data-oid attribute and hide it
+            const itemToHide = $(`div[data-oid="${mltuid}"]`);
+            if (itemToHide.length > 0) {
+                itemToHide.css("display", "none");
+                console.log(`Item with number ${mltuid} is now hidden.`);
+            } else {
+                console.warn(`No item found with number ${mltuid}.`);
+            }
         }
     });
 }

@@ -5,13 +5,13 @@ on: [push, pull_request]
 jobs:
     test:
         runs-on: ubuntu-latest
-        
+
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Set up Node.js
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                 node-version: '20'
 
@@ -21,15 +21,8 @@ jobs:
             - name: Build the project
               run: npm run build
 
-            - name: Install http-server
-              run: npm install -g http-server
-
-            - name: Start http-servers
-              run: |
-                  for i in {9001..9002}; do
-                    nohup http-server ./test/saved_pages -p $i > server-$i.log 2>&1 &
-                  done
-                  sleep 5 # Wait for the servers to start
-
+            # npm test starts the fixture servers itself, see test/run-tests.mjs.
+            # The github-actions reporter turns each failing test into an annotation, so a
+            # failure is readable from the run summary without opening the full log.
             - name: Run tests
-              run: npm run test
+              run: npm test -- --reporters=default --reporters=github-actions

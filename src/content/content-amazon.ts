@@ -1,5 +1,5 @@
 import { getEasyBlockStorageObject, setEasyBlockStorageObject } from './storage';
-import { insertButton } from './content';
+import { insertButton, suppressPageClick } from './content';
 
 /**
  * Initializes and processes the storage object for search page.
@@ -51,7 +51,8 @@ function getItemNumber(url: string) {
 /**
  * Hides item from search results on button click.
  */
-function hideItem() {
+function hideItem(event: JQuery.ClickEvent) {
+    suppressPageClick(event);
     getEasyBlockStorageObject().then((easyBlockStorageObject) => {
         const itemNumber = $(this).closest('.s-result-item').data("asin");
 
@@ -79,10 +80,11 @@ export async function processAmazonItemPage() {
 
     const userIdHideButtonDiv = document.createElement("div");
     $("#title_feature_div").first().append(userIdHideButtonDiv);
-    userIdHideButtonDiv.style.cssText = `position: relative; float: right`;
+    userIdHideButtonDiv.className = "eh-seller-button-container eh-seller-button-container--float";
 
     insertButton(36, "Hide item from search results.", classList, userIdHideButtonDiv);
-    $(userIdHideButtonDiv).on("click", ".hide-seller-button", function () {
+    $(userIdHideButtonDiv).on("click", ".hide-seller-button", function (event) {
+        suppressPageClick(event);
         $(this).toggleClass("eh-is-hidden eh-not-hidden");
         getEasyBlockStorageObject().then(async (easyBlockStorageObject) => {
             if (easyBlockStorageObject.amazon.items.includes(itemAsin)) {

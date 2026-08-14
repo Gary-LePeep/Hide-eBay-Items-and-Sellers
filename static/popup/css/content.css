@@ -3,6 +3,10 @@
     position: relative;
 }
 
+li.s-card {
+    position: relative;
+}
+
 .si-cnt .bdg-90 {
     position: relative;
     overflow: visible;
@@ -30,9 +34,21 @@
 
 .hide-seller-button {
     box-sizing: inherit;
-    position: absolute;
-    right: 0;
-    top: 0;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.eh-seller-button-container {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.eh-seller-button-container--float {
+    float: right;
+    margin-left: 0;
 }
 
 .hide-seller-profile-button {

@@ -41,6 +41,22 @@ function processWebpage() {
 }
 
 /**
+ * Stops a click on one of our buttons from also reaching the page underneath.
+ *
+ * The buttons sit inside the sites' own clickable rows, so a click that is allowed to
+ * bubble opens the seller card or the listing as well as hiding it. The buttons are
+ * <input type="image">, which would additionally submit any enclosing form.
+ *
+ * This has to be called from the handlers rather than bound to the button itself: our own
+ * handlers are delegated to ancestor elements, so suppressing the event at the button
+ * would stop them from ever running.
+ */
+export function suppressPageClick(event: JQuery.ClickEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+}
+
+/**
  * Inserts a button into the page, at the specified container selector.
  * @param {number} size The size of the button, in pixels.
  * @param {string} title The title of the button.

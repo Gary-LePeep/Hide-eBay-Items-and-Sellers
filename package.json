@@ -26,7 +26,9 @@
   "scripts": {
     "build": "webpack --mode production",
     "build-dev": "cross-env NODE_ENV=development webpack --mode development",
-    "test": "jest"
+    "test": "node test/run-tests.mjs",
+    "serve-fixtures": "node test/serve-fixtures.mjs",
+    "capture-fixtures": "node test/capture-fixtures.mjs"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -43,6 +45,7 @@
     "ts-jest": "^29.2.5",
     "ts-loader": "^9.5.1",
     "typescript": "^5.6.2",
+    "web-ext": "^10.6.0",
     "webpack": "^5.94.0",
     "webpack-cli": "^5.1.4"
   }
